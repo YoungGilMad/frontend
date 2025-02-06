@@ -1,11 +1,54 @@
-// home_tab/home.dart
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../hero_quest/hero_quest_main.dart';
 import '../daily_quest/daily_quest_main.dart';
 import '../store/store_main.dart';
 
-class HomeScreen extends StatelessWidget {
+const String API_BASE_URL = 'http://127.0.0.1:8000'; // 실제 API URL로 변경해주세요
+const String user = "user@example.com";
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String? profileImageUrl;
+  final String _token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwiZXhwIjoxNzM4ODIwNzU0fQ.wXVOMOK471J7yhukSp2ScDARzsKwYgn_QAWp537Rz5Q";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProfileImage();
+  }
+
+  Future<void> _fetchProfileImage() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$API_BASE_URL/users/me/profile-image'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        // 상대 경로를 전체 URL로 변환
+        final fullImageUrl = '$API_BASE_URL/${data['profile_img']}';
+        print('Full image URL: $fullImageUrl');  // 전체 URL 확인용
+
+        setState(() {
+          profileImageUrl = fullImageUrl;  // 전체 URL을 사용
+        });
+      }
+    } catch (e) {
+      print('Error fetching profile image: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,29 +57,34 @@ class HomeScreen extends StatelessWidget {
         color: Colors.white,
         child: Column(
           children: [
-            // 상단 프로필 영역
-
             Container(
               margin: const EdgeInsets.only(top: 40.0),
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,  // 상단 정렬을 위해 추가
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const CircleAvatar(
-                          // 여기에 이미지 url 넣으면 됨
+                        CircleAvatar(
                           radius: 15,
                           backgroundColor: Colors.grey,
+                          backgroundImage: profileImageUrl != null
+                              ? NetworkImage(profileImageUrl!)
+                              : null,
                         ),
                         const SizedBox(width: 8),
-                        Text('profile', style: TextStyle(fontSize: 15,
+                        const Text(
+                          'profile',
+                          style: TextStyle(
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
-                            decoration: TextDecoration.none)),
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
                       ],
                     ),
                     Column(
@@ -87,11 +135,14 @@ class HomeScreen extends StatelessWidget {
               width: double.infinity,
               margin: const EdgeInsets.symmetric(vertical: 20),
               child: const Center(
-                child: Text('게으른 강아지양',
-                    style: TextStyle(fontSize: 15,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.black,
-                        decoration: TextDecoration.none)
+                child: Text(
+                  '게으른 강아지양',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.black,
+                    decoration: TextDecoration.none,
+                  ),
                 ),
               ),
             ),
@@ -102,15 +153,20 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('궁극의 경지', style: TextStyle(fontSize: 30,
+                  const Text(
+                    '궁극의 경지',
+                    style: TextStyle(
+                      fontSize: 30,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
-                      decoration: TextDecoration.none)),
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   LinearProgressIndicator(
                     value: 0.7,
                     backgroundColor: Colors.grey[200],
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
                   ),
                 ],
               ),
@@ -173,7 +229,8 @@ class HomeScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Center(
-        child: Text(text,
+        child: Text(
+          text,
           style: TextStyle(color: color, fontWeight: FontWeight.bold),
         ),
       ),
