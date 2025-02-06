@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:shared_preferences/shared_preferences.dart';  // 수정된 import 구문
+import 'package:shared_preferences/shared_preferences.dart';
 import 'data/repositories/auth_repository.dart';
 import 'presentation/providers/auth_provider.dart';
+import 'presentation/screens/auth/login_screen.dart';
+import 'presentation/screens/auth/register_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +27,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});  // super parameter 문법 적용
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +45,7 @@ class MyApp extends StatelessWidget {
 }
 
 class InitialScreen extends StatelessWidget {
-  const InitialScreen({super.key});  // super parameter 문법 적용
+  const InitialScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -62,14 +64,26 @@ class InitialScreen extends StatelessWidget {
             const SizedBox(height: 48),
             ElevatedButton(
               onPressed: () {
-                // TODO: Navigate to Login Screen
+                // 로그인 화면으로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LoginScreen(),
+                  ),
+                );
               },
               child: const Text('Login'),
             ),
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: () {
-                // TODO: Navigate to Register Screen
+                // 회원가입 화면으로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const RegisterScreen(),
+                  ),
+                );
               },
               child: const Text('Register'),
             ),

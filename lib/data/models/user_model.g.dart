@@ -7,25 +7,23 @@ part of 'user_model.dart';
 // **************************************************************************
 
 UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
-      id: (json['id'] as num?)?.toInt(),
-      name: json['name'] as String,
-      phoneNumber: json['phoneNumber'] as String?,
+      id: (json['id'] as num).toInt(),
       email: json['email'] as String,
-      profileImg: json['profileImg'] as String?,
-      joinDate: json['joinDate'] == null
-          ? null
-          : DateTime.parse(json['joinDate'] as String),
-      updateDate: json['updateDate'] == null
-          ? null
-          : DateTime.parse(json['updateDate'] as String),
+      name: json['name'] as String,
+      profileImageUrl: json['profile_img'] as String?,
+      nickname: json['nickname'] as String?,
+      level: (json['level'] as num?)?.toInt() ?? 1,
+      joinDate: DateTime.parse(json['join_date'] as String),
+      updateDate: DateTime.parse(json['update_date'] as String),
     );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'id': instance.id,
-      'name': instance.name,
-      'phoneNumber': instance.phoneNumber,
       'email': instance.email,
-      'profileImg': instance.profileImg,
-      'joinDate': instance.joinDate?.toIso8601String(),
-      'updateDate': instance.updateDate?.toIso8601String(),
+      'name': instance.name,
+      'profile_img': instance.profileImageUrl,
+      'nickname': instance.nickname,
+      'level': instance.level,
+      'join_date': instance.joinDate.toIso8601String(),
+      'update_date': instance.updateDate.toIso8601String(),
     };

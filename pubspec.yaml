@@ -1,4 +1,4 @@
-name: app_beh
+name: beHero
 description: "A new Flutter project."
 publish_to: 'none'
 
@@ -16,7 +16,10 @@ dependencies:
   json_annotation: ^4.8.1
   http: ^1.1.0
   shared_preferences: ^2.2.2
-
+  google_fonts: ^6.1.0  # Material Design 3 폰트 지원
+  flutter_riverpod: ^2.4.9  # 상태 관리 (추후 퀘스트 데이터 관리용)
+  fl_chart: ^0.65.0  # 차트 시각화를 위한 라이브러리
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -26,3 +29,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  assets:
+    - .env  # .env 파일을 assets에 추가
