@@ -98,8 +98,31 @@ class RankingContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('랭킹 컨텐츠'),
+    // 랭킹을 위한 더미 데이터
+    final List<Map<String, dynamic>> rankings = List.generate(
+      20,
+          (index) => {
+        'rank': index + 1,
+        'name': '사용자 ${index + 1}',
+        'score': (1000 - index * 30),
+      },
+    );
+
+    return ListView.builder(
+      itemCount: rankings.length,
+      itemBuilder: (context, index) {
+        final ranking = rankings[index];
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: ListTile(
+            leading: CircleAvatar(
+              child: Text('${ranking['rank']}'),
+            ),
+            title: Text(ranking['name']),
+            trailing: Text('${ranking['score']}점'),
+          ),
+        );
+      },
     );
   }
 }
@@ -110,8 +133,33 @@ class FriendContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('친구 컨텐츠'),
+    // 친구 목록을 위한 더미 데이터
+    final List<Map<String, dynamic>> friends = List.generate(
+      15,
+          (index) => {
+        'name': '친구 ${index + 1}',
+        'status': index % 3 == 0 ? '온라인' : '오프라인',
+        'lastActive': '${index + 1}시간 전',
+      },
+    );
+
+    return ListView.builder(
+      itemCount: friends.length,
+      itemBuilder: (context, index) {
+        final friend = friends[index];
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: friend['status'] == '온라인' ? Colors.green : Colors.grey,
+              child: Text(friend['name'][0]),
+            ),
+            title: Text(friend['name']),
+            subtitle: Text('마지막 활동: ${friend['lastActive']}'),
+            trailing: Text(friend['status']),
+          ),
+        );
+      },
     );
   }
 }
@@ -122,8 +170,33 @@ class GroupContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('그룹 컨텐츠'),
+    // 그룹 목록을 위한 더미 데이터
+    final List<Map<String, dynamic>> groups = List.generate(
+      10,
+          (index) => {
+        'name': '그룹 ${index + 1}',
+        'members': '${(index + 1) * 3}명',
+        'description': '이것은 그룹 ${index + 1}의 설명입니다.',
+      },
+    );
+
+    return ListView.builder(
+      itemCount: groups.length,
+      itemBuilder: (context, index) {
+        final group = groups[index];
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.blue,
+              child: Icon(Icons.group, color: Colors.white),
+            ),
+            title: Text(group['name']),
+            subtitle: Text(group['description']),
+            trailing: Text(group['members']),
+          ),
+        );
+      },
     );
   }
 }
