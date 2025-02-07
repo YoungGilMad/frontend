@@ -1,5 +1,25 @@
 {
-    "cmake.ignoreCMakeListsMissing": true,
+    "java.server.launchMode": "Standard",
+    "java.configuration.updateBuildConfiguration": "automatic",
     "java.compile.nullAnalysis.mode": "automatic",
-    "java.configuration.updateBuildConfiguration": "disabled"
-}
+    "dart.flutterDaemonLogFile": "${workspaceFolder}/.dart_tool/flutter_daemon.log",
+    "dart.vmServiceLogFile": "${workspaceFolder}/.dart_tool/vm_service.log",
+    "java.import.gradle.enabled": false,
+    "java.autobuild.enabled": false,
+    "files.watcherExclude": {
+      "**/.dart_tool/**": true,
+      "**/.gradle/**": true,
+      "**/build/**": true,
+      "**/android/.gradle/**": true
+    },
+    "search.exclude": {
+      "**/.dart_tool": true,
+      "**/.gradle": true,
+      "**/build": true,
+      "**/android/.gradle": true
+    },
+    "gradle.autoDetect": "off",
+    "dart.debugExternalPackageLibraries": false,
+    "dart.debugSdkLibraries": false,
+    "cmake.ignoreCMakeListsMissing": true
+  }
