@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../screens/statistics/statistics_screen.dart';
 
-class ProgressChartWidget extends StatelessWidget {
+enum ChartPeriod { weekly, monthly, yearly }
+
+class ProgressChartWidget extends StatefulWidget {
   const ProgressChartWidget({super.key});
+
+  @override
+  State<ProgressChartWidget> createState() => _ProgressChartWidgetState();
+}
+
+class _ProgressChartWidgetState extends State<ProgressChartWidget> {
+  ChartPeriod _selectedPeriod = ChartPeriod.weekly;
 
   @override
   Widget build(BuildContext context) {
@@ -27,14 +37,19 @@ class ProgressChartWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '주간 활동 현황',
+                '활동 현황',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               TextButton(
                 onPressed: () {
-                  // TODO: Navigate to detailed statistics
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const StatisticsScreen(),
+                    ),
+                  );
                 },
                 child: const Text('자세히 보기'),
               ),
@@ -60,7 +75,7 @@ class ProgressChartWidget extends StatelessWidget {
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (value, meta) => Text(
-                        _getWeekdayText(value.toInt()),
+                        _getTimeText(value.toInt()),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
@@ -69,7 +84,7 @@ class ProgressChartWidget extends StatelessWidget {
                 borderData: FlBorderData(show: false),
                 lineBarsData: [
                   LineChartBarData(
-                    spots: _getMockData(),
+                    spots: _getData(),
                     isCurved: true,
                     color: Theme.of(context).colorScheme.primary,
                     barWidth: 4,
@@ -78,11 +93,11 @@ class ProgressChartWidget extends StatelessWidget {
                       show: true,
                       getDotPainter: (spot, percent, barData, index) =>
                           FlDotCirclePainter(
-                        radius: 6,
-                        color: Theme.of(context).colorScheme.primary,
-                        strokeWidth: 2,
-                        strokeColor: Theme.of(context).colorScheme.surface,
-                      ),
+                            radius: 6,
+                            color: Theme.of(context).colorScheme.primary,
+                            strokeWidth: 2,
+                            strokeColor: Theme.of(context).colorScheme.surface,
+                          ),
                     ),
                     belowBarData: BarAreaData(
                       show: true,
@@ -110,64 +125,173 @@ class ProgressChartWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildPeriodButton(ChartPeriod.weekly, '1주'),
+                    _buildPeriodButton(ChartPeriod.monthly, '1개월'),
+                    _buildPeriodButton(ChartPeriod.yearly, '1년'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           _buildStatsSummary(context),
         ],
       ),
     );
   }
 
-  String _getWeekdayText(int value) {
-    final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
-    if (value >= 0 && value < weekdays.length) {
-      return weekdays[value];
-    }
-    return '';
+  // 새로운 메서드 추가
+  Widget _buildPeriodButton(ChartPeriod period, String label) {
+    final isSelected = _selectedPeriod == period;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedPeriod = period;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black87,
+            fontSize: 14,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
   }
 
-  List<FlSpot> _getMockData() {
-    return [
-      const FlSpot(0, 150),
-      const FlSpot(1, 240),
-      const FlSpot(2, 180),
-      const FlSpot(3, 320),
-      const FlSpot(4, 250),
-      const FlSpot(5, 400),
-      const FlSpot(6, 280),
-    ];
+  String _getTimeText(int value) {
+    switch (_selectedPeriod) {
+      case ChartPeriod.weekly:
+        final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+        return value >= 0 && value < weekdays.length ? weekdays[value] : '';
+      case ChartPeriod.monthly:
+        return '${value + 1}주';
+      case ChartPeriod.yearly:
+        return '${value + 1}월';
+    }
+  }
+
+  List<FlSpot> _getData() {
+    switch (_selectedPeriod) {
+      case ChartPeriod.weekly:
+        return [
+          const FlSpot(0, 150),
+          const FlSpot(1, 240),
+          const FlSpot(2, 180),
+          const FlSpot(3, 320),
+          const FlSpot(4, 250),
+          const FlSpot(5, 400),
+          const FlSpot(6, 280),
+        ];
+      case ChartPeriod.monthly:
+        return [
+          const FlSpot(0, 600),
+          const FlSpot(1, 850),
+          const FlSpot(2, 720),
+          const FlSpot(3, 940),
+        ];
+      case ChartPeriod.yearly:
+        return [
+          const FlSpot(0, 2400),
+          const FlSpot(1, 3100),
+          const FlSpot(2, 2800),
+          const FlSpot(3, 3600),
+          const FlSpot(4, 3200),
+          const FlSpot(5, 3800),
+          const FlSpot(6, 3500),
+          const FlSpot(7, 4100),
+          const FlSpot(8, 3900),
+          const FlSpot(9, 4300),
+          const FlSpot(10, 4000),
+          const FlSpot(11, 4500),
+        ];
+    }
   }
 
   Widget _buildStatsSummary(BuildContext context) {
+    String period = switch (_selectedPeriod) {
+      ChartPeriod.weekly => '이번 주',
+      ChartPeriod.monthly => '이번 달',
+      ChartPeriod.yearly => '올해',
+    };
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _buildStatItem(
           context,
           '총 퀘스트',
-          '32개',
+          '${_getQuestCount()}개',
           Icons.assignment_turned_in,
         ),
         _buildStatItem(
           context,
           '획득 경험치',
-          '1,820 XP',
+          '${_getXpCount()} XP',
           Icons.star,
         ),
         _buildStatItem(
           context,
           '성장률',
-          '+24%',
+          _getGrowthRate(),
           Icons.trending_up,
         ),
       ],
     );
   }
 
+  int _getQuestCount() {
+    return switch (_selectedPeriod) {
+      ChartPeriod.weekly => 32,
+      ChartPeriod.monthly => 128,
+      ChartPeriod.yearly => 1560,
+    };
+  }
+
+  String _getXpCount() {
+    return switch (_selectedPeriod) {
+      ChartPeriod.weekly => '1,820',
+      ChartPeriod.monthly => '7,280',
+      ChartPeriod.yearly => '87,360',
+    };
+  }
+
+  String _getGrowthRate() {
+    return switch (_selectedPeriod) {
+      ChartPeriod.weekly => '+24%',
+      ChartPeriod.monthly => '+32%',
+      ChartPeriod.yearly => '+156%',
+    };
+  }
+
   Widget _buildStatItem(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-  ) {
+      BuildContext context,
+      String label,
+      String value,
+      IconData icon,
+      ) {
     return Column(
       children: [
         Container(
@@ -186,14 +310,14 @@ class ProgressChartWidget extends StatelessWidget {
         Text(
           value,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
+            color: Colors.grey[600],
+          ),
         ),
       ],
     );

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../home/home_screen.dart';
+import '../social/social_screen.dart';
+
 
 class CustomDrawer extends StatefulWidget {
   final Function(Widget) onScreenChange;
@@ -93,7 +95,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
               icon: const Icon(Icons.person_outline),
               color: Colors.grey,
               onPressed: () {
-                widget.onScreenChange(const Center(child: Text('Profile Screen')));
+                widget.onScreenChange(const SocialScreen());
                 Navigator.pop(context);
               },
             ),
