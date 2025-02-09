@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../home/home_screen.dart';  // HomeScreen import 추가
+import '../menu/menu_screen.dart';  // HomeScreen import 추가
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -65,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
           // 홈 화면으로 이동 (이전 스택의 모든 화면 제거)
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-              builder: (context) => const HomeScreen(),
+              builder: (context) => const MenuScreen(),
             ),
             (route) => false,  // 모든 이전 라우트 제거
           );
