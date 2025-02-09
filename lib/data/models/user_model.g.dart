@@ -12,9 +12,12 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       name: json['name'] as String,
       profileImageUrl: json['profile_img'] as String?,
       nickname: json['nickname'] as String?,
-      level: (json['level'] as num?)?.toInt() ?? 1,
-      joinDate: DateTime.parse(json['join_date'] as String),
-      updateDate: DateTime.parse(json['update_date'] as String),
+      level: (json['hero_level'] as num?)?.toInt() ?? 1,
+      joinDate: UserModel._dateFromJson(json['join_date']),
+      updateDate: UserModel._dateFromJson(json['update_date']),
+      coin: (json['coin'] as num?)?.toInt() ?? 0,
+      avatarId: (json['avatar_id'] as num?)?.toInt(),
+      backgroundId: (json['background_id'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
@@ -23,7 +26,10 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'name': instance.name,
       'profile_img': instance.profileImageUrl,
       'nickname': instance.nickname,
-      'level': instance.level,
-      'join_date': instance.joinDate.toIso8601String(),
-      'update_date': instance.updateDate.toIso8601String(),
+      'hero_level': instance.level,
+      'join_date': UserModel._dateToJson(instance.joinDate),
+      'update_date': UserModel._dateToJson(instance.updateDate),
+      'coin': instance.coin,
+      'avatar_id': instance.avatarId,
+      'background_id': instance.backgroundId,
     };

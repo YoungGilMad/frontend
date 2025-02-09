@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../home/home_screen.dart';  // HomeScreen import 추가
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -44,14 +45,46 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      final success = await context.read<AuthProvider>().login(
-        _emailController.text,
-        _passwordController.text,
-      );
+      try {
+        final success = await context.read<AuthProvider>().login(
+          _emailController.text,
+          _passwordController.text,
+        );
 
-      if (success && mounted) {
-        // 로그인 성공 시 홈 화면으로 이동
-        Navigator.of(context).pushReplacementNamed('/home');
+        if (success && mounted) {
+          // 로그인 성공
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('로그인 성공'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          // 홈 화면으로 이동 (이전 스택의 모든 화면 제거)
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => const HomeScreen(),
+            ),
+            (route) => false,  // 모든 이전 라우트 제거
+          );
+        }
+      } catch (e) {
+        // 로그인 실패 시 에러 메시지 표시
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                e.toString().contains('Incorrect email or password')
+                    ? '이메일 또는 비밀번호가 올바르지 않습니다.'
+                    : '로그인 중 오류가 발생했습니다.',
+              ),
+              backgroundColor: Theme.of(context).colorScheme.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       }
     }
   }
