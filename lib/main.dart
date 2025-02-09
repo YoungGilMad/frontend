@@ -6,6 +6,7 @@ import 'data/repositories/auth_repository.dart';
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/screens/auth/login_screen.dart';
 import 'presentation/screens/auth/register_screen.dart';
+import 'core/theme/app_theme.dart';  // AppTheme import 추가
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,11 +35,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'BeHero',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,  // 여기서 AppTheme 적용
       home: const InitialScreen(),
     );
   }
@@ -62,9 +59,8 @@ class InitialScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 48),
-            ElevatedButton(
+            FilledButton(  // ElevatedButton 대신 FilledButton 사용
               onPressed: () {
-                // 로그인 화면으로 이동
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -77,7 +73,6 @@ class InitialScreen extends StatelessWidget {
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: () {
-                // 회원가입 화면으로 이동
                 Navigator.push(
                   context,
                   MaterialPageRoute(
