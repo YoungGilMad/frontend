@@ -184,13 +184,24 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                     ),
                     FilledButton.icon(
                       onPressed: () async {
-                        // AI 퀘스트 생성 로직
                         await _generateAIQuest(
                           titleController,
                           contentController,
-                          (tag) => selectedTag = tag,
-                          (h) => selectedHours = h,
-                          (m) => selectedMinutes = m,
+                              (tag) {
+                            setState(() {
+                              selectedTag = tag;
+                            });
+                          },
+                              (h) {
+                            setState(() {
+                              selectedHours = h;
+                            });
+                          },
+                              (m) {
+                            setState(() {
+                              selectedMinutes = m;
+                            });
+                          },
                         );
                       },
                       icon: const Icon(Icons.auto_awesome),
@@ -229,13 +240,70 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
 
   // AI 퀘스트 생성 로직
   Future<void> _generateAIQuest(
-    TextEditingController titleController,
-    TextEditingController contentController,
-    Function(String) onTagSelected,
-    Function(int) onHoursSelected,
-    Function(int) onMinutesSelected,
-  ) async {
-    // OpenAI API 로직은 이전과 동일
+      TextEditingController titleController,
+      TextEditingController contentController,
+      Function(String) onTagSelected,
+      Function(int) onHoursSelected,
+      Function(int) onMinutesSelected,
+      ) async {
+    const apiKey = 'YOUR_OPENAI_API_KEY'; // OpenAI API 키 입력
+    const endpoint = 'https://api.openai.com/v1/chat/completions';
+
+    final prompt = """
+    사용자가 자기 계발을 위해 수행할 수 있는 퀘스트를 생성해줘.
+    1. 정해진 리스트 내에서 태그를 랜덤으로 선택하고 태그가 선택되어 있으면 해당 태그값으로 지정,
+    2. 지정된 태그에 맞는 제목과 내용을 너가 작성해주고,
+    3. 작성한 내용에 적합한 목표 시간을 설정해줘.
+    응답 형식은 JSON으로 다음 정보를 포함해야 해.
+    {
+      "title": "퀘스트 제목",
+      "content": "퀘스트 설명",
+      "hours": 목표 시간 (1~6),
+      "minutes": 목표 분 단위 (0, 15, 30, 45 중 선택),
+      "tag": "운동 및 스포츠 / 공부 / 자기개발 / 취미 / 명상 및 스트레칭 / 기타 중 하나"
+    }
+  """;
+
+    try {
+      final response = await http.post(
+        Uri.parse(endpoint),
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "model": "gpt-4",
+          "messages": [
+            {"role": "system", "content": "너는 사용자의 성장을 돕고 자기계발에 맞는 퀘스트를 작성하는 assistant야."},
+            {"role": "user", "content": prompt}
+          ]
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final generatedData = jsonDecode(data['choices'][0]['message']['content']);
+
+        // API 응답을 안전하게 적용
+        if (generatedData != null && generatedData is Map<String, dynamic>) {
+          if (mounted) {
+            setState(() {
+              titleController.text = generatedData['title'] ?? '생성된 퀘스트';
+              contentController.text = generatedData['content'] ?? '퀘스트 설명 없음';
+            });
+
+            // 콜백을 통해 값 업데이트
+            onTagSelected(generatedData['tag'] ?? '기타');
+            onHoursSelected(generatedData['hours'] ?? 1);
+            onMinutesSelected(generatedData['minutes'] ?? 0);
+          }
+        }
+      } else {
+        print("API 요청 실패: ${response.statusCode}, 응답: ${response.body}");
+      }
+    } catch (error) {
+      print("AI 퀘스트 생성 중 오류 발생: $error");
+    }
   }
 
   @override
