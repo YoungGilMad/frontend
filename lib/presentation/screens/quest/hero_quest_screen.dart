@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../widgets/common/app_bar_widget.dart';
-import '../../widgets/quest/hero_quest_card_widget.dart';
 
 class HeroQuestScreen extends StatefulWidget {
   const HeroQuestScreen({super.key});

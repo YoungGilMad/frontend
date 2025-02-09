@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../data/models/user_model.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 
 class HeroStatusWidget extends StatelessWidget {
