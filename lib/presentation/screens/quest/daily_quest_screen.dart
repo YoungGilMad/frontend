@@ -29,15 +29,16 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
   };
 
   void _showQuestCreationDialog() {
-    final TextEditingController titleController = TextEditingController();
-    final TextEditingController contentController = TextEditingController();
-    String? selectedTag = tags.first;
-    int selectedHours = 1;
-    int selectedMinutes = 0;
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController contentController = TextEditingController();
+  String? selectedTag = tags.first;
+  int selectedHours = 1;
+  int selectedMinutes = 0;
 
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
+  showDialog(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setDialogState) => Dialog(
         insetPadding: const EdgeInsets.all(16),
         child: Container(
           width: double.infinity,
@@ -100,7 +101,11 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                                   child: Text('$h시간'),
                                 ))
                             .toList(),
-                        onChanged: (value) => selectedHours = value!,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            selectedHours = value!;
+                          });
+                        },
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -117,7 +122,11 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                                   child: Text('$m분'),
                                 ))
                             .toList(),
-                        onChanged: (value) => selectedMinutes = value!,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            selectedMinutes = value!;
+                          });
+                        },
                       ),
                     ),
                   ],
@@ -141,7 +150,11 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                             child: Text(tag),
                           ))
                       .toList(),
-                  onChanged: (value) => selectedTag = value,
+                  onChanged: (value) {
+                    setDialogState(() {
+                      selectedTag = value;
+                    });
+                  },
                 ),
                 const SizedBox(height: 24),
 
@@ -158,7 +171,7 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                       label: Text(day),
                       selected: _selectedDays[day]!,
                       onSelected: (bool selected) {
-                        setState(() {
+                        setDialogState(() {
                           _selectedDays[day] = selected;
                         });
                       },
@@ -187,21 +200,9 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                         await _generateAIQuest(
                           titleController,
                           contentController,
-                              (tag) {
-                            setState(() {
-                              selectedTag = tag;
-                            });
-                          },
-                              (h) {
-                            setState(() {
-                              selectedHours = h;
-                            });
-                          },
-                              (m) {
-                            setState(() {
-                              selectedMinutes = m;
-                            });
-                          },
+                          (tag) => selectedTag = tag,
+                          (h) => selectedHours = h,
+                          (m) => selectedMinutes = m,
                         );
                       },
                       icon: const Icon(Icons.auto_awesome),
@@ -235,9 +236,10 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
           ),
         ),
       ),
-    );
-  }
-
+    ),
+  );
+}
+  
   // AI 퀘스트 생성 로직
   Future<void> _generateAIQuest(
       TextEditingController titleController,
