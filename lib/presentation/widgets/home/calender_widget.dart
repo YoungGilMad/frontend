@@ -34,9 +34,19 @@ class _CalendarWidgetState extends State<CalendarWidget> {
     DateTime(2025, 2, 10): [
       Todo(title: '영어 문법 공부', category: '학습'),
       Todo(title: '운동하기', category: '건강'),
+    ],
+    DateTime(2025, 2, 11): [
+      Todo(title: '영어 문법 공부', category: '학습'),
       Todo(title: '운동하기', category: '건강'),
+      Todo(title: '밥먹기', category: '건강'),
+      Todo(title: '산책하기', category: '건강'),
+    ],
+    DateTime(2025, 2, 12): [
+      Todo(title: '영어 문법 공부', category: '학습'),
       Todo(title: '운동하기', category: '건강'),
-      Todo(title: '운동하기', category: '건강'),
+      Todo(title: '밥먹기', category: '건강'),
+      Todo(title: '산책하기', category: '건강'),
+      Todo(title: '영양제 먹기', category: '건강'),
     ],
   };
 
