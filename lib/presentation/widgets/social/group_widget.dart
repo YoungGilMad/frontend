@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'create_group_widget.dart';
 
 class GroupWidget extends StatelessWidget {
   final List<GroupItem> groups;
-  final VoidCallback? onCreateGroup;
   final Function(GroupItem group)? onGroupTap;
   final Function(GroupItem group)? onLeaveGroup;
   final Function(String userId, GroupItem group)? onInviteMember;
@@ -10,7 +10,6 @@ class GroupWidget extends StatelessWidget {
   const GroupWidget({
     super.key,
     required this.groups,
-    this.onCreateGroup,
     this.onGroupTap,
     this.onLeaveGroup,
     this.onInviteMember,
@@ -24,7 +23,14 @@ class GroupWidget extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: FilledButton.icon(
-            onPressed: onCreateGroup,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateGroupWidget(),
+                ),
+              );
+            },
             icon: const Icon(Icons.add),
             label: const Text('새 스터디 그룹 만들기'),
           ),
@@ -35,13 +41,13 @@ class GroupWidget extends StatelessWidget {
           child: groups.isEmpty
               ? _buildEmptyState(context)
               : ListView.builder(
-                  itemCount: groups.length,
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  itemBuilder: (context, index) {
-                    final group = groups[index];
-                    return _buildGroupCard(context, group);
-                  },
-                ),
+            itemCount: groups.length,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            itemBuilder: (context, index) {
+              final group = groups[index];
+              return _buildGroupCard(context, group);
+            },
+          ),
         ),
       ],
     );
@@ -61,15 +67,15 @@ class GroupWidget extends StatelessWidget {
           Text(
             '아직 참여 중인 그룹이 없습니다',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
+              color: Colors.grey[600],
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             '새로운 스터디 그룹을 만들어보세요!',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
+              color: Colors.grey[600],
+            ),
           ),
         ],
       ),
@@ -96,8 +102,8 @@ class GroupWidget extends StatelessWidget {
                     child: Text(
                       group.name.substring(0, 1).toUpperCase(),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          ),
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -108,8 +114,8 @@ class GroupWidget extends StatelessWidget {
                         Text(
                           group.name,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text(
                           '멤버 ${group.memberCount}명',
@@ -122,7 +128,7 @@ class GroupWidget extends StatelessWidget {
                     onSelected: (value) {
                       switch (value) {
                         case 'invite':
-                          // TODO: Show member invite dialog
+                        // TODO: Show member invite dialog
                           break;
                         case 'leave':
                           onLeaveGroup?.call(group);
@@ -197,11 +203,11 @@ class GroupWidget extends StatelessWidget {
   }
 
   Widget _buildActivityInfo(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String value,
-  ) {
+      BuildContext context,
+      IconData icon,
+      String label,
+      String value,
+      ) {
     return Column(
       children: [
         Icon(
@@ -213,8 +219,8 @@ class GroupWidget extends StatelessWidget {
         Text(
           value,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Text(
           label,

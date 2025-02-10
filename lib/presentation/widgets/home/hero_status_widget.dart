@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import 'character_detail_widget.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HeroStatusWidget extends StatelessWidget {
   const HeroStatusWidget({super.key});
@@ -53,42 +55,60 @@ class HeroStatusWidget extends StatelessWidget {
   }
 
   Widget _buildHeroAvatar(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Theme.of(context).colorScheme.primary,
-              width: 2,
+    return GestureDetector(
+      onTap: () {
+        // 캐릭터 위젯으로 네비게이션
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const CharacterDetailWidget(), // 새로운 스크린 생성 필요
+          ),
+        );
+      },
+      child: SizedBox(
+        width: 80,
+        height: 80,
+        child: Stack(
+          children: [
+            // SVG 캐릭터
+            SvgPicture.string(
+              '''<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" fill="#FFD93D"/>
+              <g transform="translate(0,2)">
+                <circle cx="35" cy="42" r="8" fill="white"/>
+                <circle cx="35" cy="42" r="4" fill="black"/>
+                <circle cx="37" cy="40" r="2" fill="white"/>
+                <circle cx="65" cy="42" r="8" fill="white"/>
+                <circle cx="65" cy="42" r="4" fill="black"/>
+                <circle cx="67" cy="40" r="2" fill="white"/>
+              </g>
+              <circle cx="30" cy="55" r="8" fill="#FF9999" opacity="0.4"/>
+              <circle cx="70" cy="55" r="8" fill="#FF9999" opacity="0.4"/>
+              <path d="M 40 58 Q 50 68 60 58" fill="none" stroke="#FF6B6B" stroke-width="4" stroke-linecap="round"/>
+            </svg>''' ,
+            width: 80,
+            height: 80,
             ),
-          ),
-          child: const Icon(
-            Icons.person,
-            size: 40,
-            color: Colors.grey,
-          ),
+            // 편집 버튼
+            // Positioned(
+            //   right: 0,
+            //   bottom: 0,
+            //   child: Container(
+            //     padding: const EdgeInsets.all(4),
+            //     decoration: BoxDecoration(
+            //       color: Theme.of(context).colorScheme.primary,
+            //       shape: BoxShape.circle,
+            //     ),
+            //     child: const Icon(
+            //       Icons.edit,
+            //       size: 16,
+            //       color: Colors.white,
+            //     ),
+            //   ),
+            // ),
+          ],
         ),
-        Positioned(
-          right: 0,
-          bottom: 0,
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.edit,
-              size: 16,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 

@@ -160,46 +160,49 @@ class FriendTab extends StatelessWidget {
 class GroupTab extends StatelessWidget {
   const GroupTab({super.key});
 
+  // 샘플 그룹 데이터 생성
+  List<GroupItem> _getSampleGroups() {
+    return [
+      GroupItem(
+        id: '1',
+        name: '알고리즘 스터디',
+        description: '매주 알고리즘 문제를 함께 풀어보는 스터디입니다.',
+        memberCount: 5,
+        isOwner: true,
+        completedQuests: 12,
+        weeklyGrowth: 15,
+        ranking: 3,
+      ),
+      GroupItem(
+        id: '2',
+        name: '플러터 마스터',
+        description: '플러터 개발 스터디 그룹입니다.',
+        memberCount: 8,
+        completedQuests: 8,
+        weeklyGrowth: 10,
+        ranking: 7,
+      ),
+      // 필요한 만큼 샘플 데이터 추가
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // 그룹 생성 버튼
-          FilledButton.icon(
-            onPressed: () {
-              // TODO: Implement create group
-            },
-            icon: const Icon(Icons.add),
-            label: const Text('새 그룹 만들기'),
-          ),
-          const SizedBox(height: 16),
-          // 그룹 목록
-          Expanded(
-            child: ListView.builder(
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.grey[200],
-                      child: const Icon(Icons.group),
-                    ),
-                    title: Text('Group ${index + 1}'),
-                    subtitle: Text('멤버 ${index + 5}명'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      // TODO: Navigate to group detail
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+    return GroupWidget(
+      groups: _getSampleGroups(),
+      onGroupTap: (group) {
+        // TODO: Implement group detail navigation
+        debugPrint('Tapped group: ${group.name}');
+      },
+      onLeaveGroup: (group) {
+        // TODO: Implement leave group
+        debugPrint('Leave group: ${group.name}');
+      },
+      onInviteMember: (userId, group) {
+        // TODO: Implement invite member
+        debugPrint('Invite member to group: ${group.name}');
+      },
     );
   }
+
 }

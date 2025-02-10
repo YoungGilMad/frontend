@@ -21,6 +21,7 @@ dependencies:
   fl_chart: ^0.65.0  # 차트 시각화를 위한 라이브러리
   table_calendar: ^3.0.9 # 캘린더 라이브러리
   intl: ^0.18.0 # 캘린더 관련 언어 설정 라이브러리
+  flutter_svg: ^2.0.9
   
 dev_dependencies:
   flutter_test:
