@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'create_group_widget.dart';
 import 'join_group_widget.dart';
+import 'room_widget.dart';
 
 class GroupWidget extends StatelessWidget {
   final List<GroupItem> groups;
@@ -18,6 +19,7 @@ class GroupWidget extends StatelessWidget {
     this.onCreateGroup,
   });
 
+  @override
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -279,7 +281,14 @@ class _GroupCardState extends State<_GroupCard> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: () => widget.onGroupTap?.call(widget.group),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RoomWidget(group: widget.group),
+                        ),
+                      );
+                    },
                     icon: const Icon(Icons.login),
                     label: const Text('방 들어가기'),
                   ),

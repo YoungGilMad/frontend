@@ -71,7 +71,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
       height: MediaQuery.of(context).size.height,
       child: Column(
         children: [
-          // Calendar section - Not Expanded
+          // Calendar section
           Container(
             margin: const EdgeInsets.symmetric(vertical: 16),
             padding: const EdgeInsets.all(16),
@@ -87,8 +87,12 @@ class _CalendarWidgetState extends State<CalendarWidget> {
               selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
               onDaySelected: (selectedDay, focusedDay) {
                 setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
+                  if (isSameDay(_selectedDay, selectedDay)) {
+                    _selectedDay = null;
+                  } else {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                  }
                 });
               },
               calendarStyle: CalendarStyle(
@@ -196,51 +200,51 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             ),
           ),
 
-          // Events section - Expanded to fill remaining space
+          // Date header (always visible)
+          if (_selectedDay != null)
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                '${_selectedDay!.month}월 ${_selectedDay!.day}일',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+          // Todos with AnimatedContainer
           Expanded(
-            child: Container(
-              child: _selectedDay != null
-                  ? Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      '${_selectedDay!.month}월 ${_selectedDay!.day}일',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 500),
+              height: _selectedDay != null ? (_getEventsForDay(_selectedDay!).length * 80.0) : 0,
+              curve: Curves.easeInOut,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: _selectedDay != null
+                      ? _getEventsForDay(_selectedDay!).map((todo) => Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ListTile(
+                        title: Text(
+                          todo.title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _getEventsForDay(_selectedDay!).length,
-                      itemBuilder: (context, index) {
-                        final todo = _getEventsForDay(_selectedDay!)[index];
-                        return Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: ListTile(
-                            title: Text(
-                              todo.title,
-                              style: const TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              )
-                  : const SizedBox(), // Empty container when no date is selected
+                  )).toList()
+                      : [],
+                ),
+              ),
             ),
           ),
         ],
