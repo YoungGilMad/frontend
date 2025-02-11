@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'create_group_widget.dart';
+import 'join_group_widget.dart';
 
 class GroupWidget extends StatelessWidget {
   final List<GroupItem> groups;
   final Function(GroupItem group)? onGroupTap;
   final Function(GroupItem group)? onLeaveGroup;
   final Function(String userId, GroupItem group)? onInviteMember;
+  final Function(String name, String? description)? onCreateGroup;
 
   const GroupWidget({
     super.key,
@@ -13,26 +15,44 @@ class GroupWidget extends StatelessWidget {
     this.onGroupTap,
     this.onLeaveGroup,
     this.onInviteMember,
+    this.onCreateGroup,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // 그룹 생성 버튼
+        // 그룹 생성 및 참여 버튼
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: FilledButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CreateGroupWidget(),
+          child: Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {
+                    _showCreateGroupDialog(context);
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('새 스터디 그룹 만들기'),
                 ),
-              );
-            },
-            icon: const Icon(Icons.add),
-            label: const Text('새 스터디 그룹 만들기'),
+              ),
+              const SizedBox(width: 12),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const JoinGroupWidget(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.search),
+                label: const Text('참여'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 48),
+                ),
+              ),
+            ],
           ),
         ),
 
@@ -45,11 +65,67 @@ class GroupWidget extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             itemBuilder: (context, index) {
               final group = groups[index];
-              return _buildGroupCard(context, group);
+              return _GroupCard(
+                group: group,
+                onGroupTap: onGroupTap,
+              );
             },
           ),
         ),
       ],
+    );
+  }
+
+  // 그룹 생성 다이얼로그
+  Future<void> _showCreateGroupDialog(BuildContext context) async {
+    final nameController = TextEditingController();
+    final descriptionController = TextEditingController();
+
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('새 스터디 그룹 만들기'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: '그룹 이름',
+                hintText: '그룹 이름을 입력하세요',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: '그룹 설명',
+                hintText: '그룹 설명을 입력하세요',
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (nameController.text.isNotEmpty) {
+                onCreateGroup?.call(
+                  nameController.text,
+                  descriptionController.text.isEmpty
+                      ? null
+                      : descriptionController.text,
+                );
+              }
+            },
+            child: const Text('만들기'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -72,21 +148,69 @@ class GroupWidget extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '새로운 스터디 그룹을 만들어보세요!',
+            '새로운 스터디 그룹을 만들거나 참여해보세요!',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.grey[600],
             ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FilledButton.icon(
+                onPressed: () {
+                  _showCreateGroupDialog(context);
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('그룹 만들기'),
+              ),
+              const SizedBox(width: 12),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const JoinGroupWidget(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.search),
+                label: const Text('그룹 참여하기'),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildGroupCard(BuildContext context, GroupItem group) {
+class _GroupCard extends StatefulWidget {
+  final GroupItem group;
+  final Function(GroupItem group)? onGroupTap;
+
+  const _GroupCard({
+    required this.group,
+    this.onGroupTap,
+  });
+
+  @override
+  State<_GroupCard> createState() => _GroupCardState();
+}
+
+class _GroupCardState extends State<_GroupCard> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
-        onTap: () => onGroupTap?.call(group),
+        onTap: () {
+          setState(() {
+            _isExpanded = !_isExpanded;
+          });
+        },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -100,7 +224,7 @@ class GroupWidget extends StatelessWidget {
                     radius: 24,
                     backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                     child: Text(
-                      group.name.substring(0, 1).toUpperCase(),
+                      widget.group.name.substring(0, 1).toUpperCase(),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: Theme.of(context).colorScheme.onPrimaryContainer,
                       ),
@@ -112,121 +236,59 @@ class GroupWidget extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          group.name,
+                          widget.group.name,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          '멤버 ${group.memberCount}명',
+                          '멤버 ${widget.group.memberCount}명',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                     ),
                   ),
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'invite':
-                        // TODO: Show member invite dialog
-                          break;
-                        case 'leave':
-                          onLeaveGroup?.call(group);
-                          break;
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'invite',
-                        child: Row(
-                          children: [
-                            Icon(Icons.person_add),
-                            SizedBox(width: 8),
-                            Text('멤버 초대'),
-                          ],
-                        ),
-                      ),
-                      if (!group.isOwner)
-                        const PopupMenuItem(
-                          value: 'leave',
-                          child: Row(
-                            children: [
-                              Icon(Icons.exit_to_app),
-                              SizedBox(width: 8),
-                              Text('그룹 나가기'),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
                 ],
               ),
-              if (group.description != null) ...[
-                const SizedBox(height: 12),
+
+              // 활동중인 멤버와 버튼 (확장 시에만 표시)
+              if (_isExpanded) ...[
+                const SizedBox(height: 16),
                 Text(
-                  group.description!,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  '현재 활동중',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 40,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: widget.group.activeMembers.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(widget.group.activeMembers[index].photoUrl),
+                          radius: 20,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () => widget.onGroupTap?.call(widget.group),
+                    icon: const Icon(Icons.login),
+                    label: const Text('방 들어가기'),
+                  ),
                 ),
               ],
-              const SizedBox(height: 12),
-              // 활동 정보
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildActivityInfo(
-                    context,
-                    Icons.task_alt,
-                    '완료한 퀘스트',
-                    '${group.completedQuests}개',
-                  ),
-                  _buildActivityInfo(
-                    context,
-                    Icons.trending_up,
-                    '주간 성장률',
-                    '${group.weeklyGrowth}%',
-                  ),
-                  _buildActivityInfo(
-                    context,
-                    Icons.emoji_events,
-                    '그룹 랭킹',
-                    '#${group.ranking}',
-                  ),
-                ],
-              ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildActivityInfo(
-      BuildContext context,
-      IconData icon,
-      String label,
-      String value,
-      ) {
-    return Column(
-      children: [
-        Icon(
-          icon,
-          size: 20,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      ],
     );
   }
 }
@@ -240,6 +302,7 @@ class GroupItem {
   final int completedQuests;
   final int weeklyGrowth;
   final int ranking;
+  final List<ActiveMember> activeMembers;
 
   const GroupItem({
     required this.id,
@@ -250,5 +313,18 @@ class GroupItem {
     this.completedQuests = 0,
     this.weeklyGrowth = 0,
     this.ranking = 0,
+    this.activeMembers = const [],
+  });
+}
+
+class ActiveMember {
+  final String id;
+  final String name;
+  final String photoUrl;
+
+  const ActiveMember({
+    required this.id,
+    required this.name,
+    required this.photoUrl,
   });
 }
