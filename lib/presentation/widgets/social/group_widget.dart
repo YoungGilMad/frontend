@@ -51,7 +51,7 @@ class GroupWidget extends StatelessWidget {
                 icon: const Icon(Icons.search),
                 label: const Text('참여'),
                 style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, 48),
+                  minimumSize: const Size(0, 40),
                 ),
               ),
             ],
