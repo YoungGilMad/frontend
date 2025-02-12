@@ -64,8 +64,8 @@ class _AnimatedCharacterWidgetState extends State<AnimatedCharacterWidget> {
       child: SvgPicture.string(
         _frames[_currentIndex],
         key: ValueKey<int>(_currentIndex),
-        width: 80,
-        height: 80,
+        width: 200,
+        height: 200,
       ),
     );
   }

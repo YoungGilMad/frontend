@@ -9,6 +9,9 @@ class HeroStatusWidget extends StatelessWidget {
   const HeroStatusWidget({super.key});
 
   @override
+  // lib/widgets/home/hero_status_widget.dart의 일부
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
@@ -28,21 +31,13 @@ class HeroStatusWidget extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // 캐릭터 아바타 및 기본 정보
-              Row(
+              // 기본 정보
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeroAvatar(context),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildHeroInfo(context, authProvider),
-                        const SizedBox(height: 8),
-                        _buildExperienceBar(context),
-                      ],
-                    ),
-                  ),
+                  _buildHeroInfo(context, authProvider),
+                  const SizedBox(height: 8),
+                  _buildExperienceBar(context),
                 ],
               ),
               const SizedBox(height: 16),
@@ -54,6 +49,8 @@ class HeroStatusWidget extends StatelessWidget {
       },
     );
   }
+
+// _buildHeroAvatar 메서드는 제거
 
   Widget _buildHeroAvatar(BuildContext context) {
     return GestureDetector(

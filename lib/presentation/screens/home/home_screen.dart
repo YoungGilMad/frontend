@@ -9,6 +9,8 @@ import '../../widgets/home/calender_widget.dart';
 import '../quest/daily_quest_screen.dart';
 import '../quest/hero_quest_screen.dart';
 import '../store/store_screen.dart';
+import '../../widgets/home/animated_character_widget.dart';  // 경로를 확인해주세요
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -27,7 +29,9 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     // 상단 프로필 및 메뉴 영역
                     _buildHeader(context, authProvider),
-                    
+
+                    _buildCharacterSection(),
+
                     // 캐릭터 영역
                     const HeroStatusWidget(),
                     
@@ -110,6 +114,16 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCharacterSection() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      height: 200,
+      child: const Center(
+        child: AnimatedCharacterWidget(),
       ),
     );
   }
