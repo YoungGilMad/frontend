@@ -44,6 +44,9 @@ class SettingsScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+
+                const SizedBox(height: 12),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
@@ -57,6 +60,7 @@ class SettingsScreen extends StatelessWidget {
                         },
                         child: Container(
                           width: 350,  // 너비 조정
+                          height: 50,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: Colors.black,
@@ -64,7 +68,7 @@ class SettingsScreen extends StatelessWidget {
                           ),
                           child: const Center(  // 텍스트 중앙 정렬
                             child: Text(
-                              '프로필 변경',
+                              '내 정보 업데이트',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -84,6 +88,7 @@ class SettingsScreen extends StatelessWidget {
                         },
                         child: Container(
                           width: 350,  // 너비 조정
+                          height: 50,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: Colors.black,

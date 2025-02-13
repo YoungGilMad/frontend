@@ -74,10 +74,18 @@ class _ProgressChartWidgetState extends State<ProgressChartWidget> {
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      getTitlesWidget: (value, meta) => Text(
-                        _getTimeText(value.toInt()),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
+                      reservedSize: 22,
+                      interval: 1,  // 간격을 1로 설정
+                      getTitlesWidget: (value, meta) {
+                        // value가 정수인 경우에만 라벨 표시
+                        if (value != value.toInt()) {
+                          return const Text('');
+                        }
+                        return Text(
+                          _getTimeText(value.toInt()),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        );
+                      },
                     ),
                   ),
                 ),
