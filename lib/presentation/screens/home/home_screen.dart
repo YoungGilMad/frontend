@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../providers/auth_provider.dart';
 import '../../widgets/home/hero_status_widget.dart';
 import '../../widgets/home/progress_chart_widget.dart';

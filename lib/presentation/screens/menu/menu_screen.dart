@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import '../home/home_screen.dart';
 import '../social/social_screen.dart';
-
+import '../settings/settings_screen.dart';
 
 class CustomDrawer extends StatefulWidget {
   final Function(Widget) onScreenChange;
+  final int currentIndex;  // 추가: 현재 선택된 화면 인덱스
 
   const CustomDrawer({
     super.key,
     required this.onScreenChange,
+    required this.currentIndex,  // 추가
   });
 
   @override
@@ -17,6 +19,7 @@ class CustomDrawer extends StatefulWidget {
 
 class _CustomDrawerState extends State<CustomDrawer> {
   bool _showColors = false;
+  late int _selectedIndex;  // widget.currentIndex로 초기화됨
 
   final List<Color> themeColors = [
     Colors.blue,
@@ -27,6 +30,20 @@ class _CustomDrawerState extends State<CustomDrawer> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.currentIndex;  // 초기화
+  }
+
+  @override
+  void didUpdateWidget(CustomDrawer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentIndex != widget.currentIndex) {
+      _selectedIndex = widget.currentIndex;  // 업데이트
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Drawer(
       width: 60,
@@ -34,8 +51,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         color: Colors.grey[200],
         child: Column(
           children: [
-            const SizedBox(height: 40), // 색상 선택기와 홈 아이콘 사이 간격
-            // Theme Color Button
+            const SizedBox(height: 40),
             GestureDetector(
               onTap: () {
                 setState(() {
@@ -51,7 +67,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 ),
               ),
             ),
-            // Color Options
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               height: _showColors ? (themeColors.length * 41.0) : 0,
@@ -62,7 +77,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     padding: const EdgeInsets.only(top: 16),
                     child: GestureDetector(
                       onTap: () {
-                        // Add theme change logic here
                         setState(() {
                           _showColors = false;
                         });
@@ -80,41 +94,47 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 ),
               ),
             ),
-            const SizedBox(height: 80), // 상단 여백 증가
-            // Home Icon
+            const SizedBox(height: 80),
             IconButton(
               icon: const Icon(Icons.home),
+              color: _selectedIndex == 0 ? Colors.black : Colors.grey,
               onPressed: () {
+                setState(() {
+                  _selectedIndex = 0;
+                });
                 widget.onScreenChange(const HomeScreen());
                 Navigator.pop(context);
               },
             ),
-            const SizedBox(height: 24), // 아이콘들 사이 간격
-            // Profile Icon
+            const SizedBox(height: 24),
             IconButton(
-              icon: const Icon(Icons.person_outline),
-              color: Colors.grey,
+              icon: const Icon(Icons.person),
+              color: _selectedIndex == 1 ? Colors.black : Colors.grey,
               onPressed: () {
+                setState(() {
+                  _selectedIndex = 1;
+                });
                 widget.onScreenChange(const SocialScreen());
                 Navigator.pop(context);
               },
             ),
             const SizedBox(height: 16),
-            // Settings Icon
             IconButton(
-              icon: const Icon(Icons.settings_outlined),
-              color: Colors.grey,
+              icon: const Icon(Icons.settings),
+              color: _selectedIndex == 2 ? Colors.black : Colors.grey,
               onPressed: () {
-                widget.onScreenChange(const Center(child: Text('Settings Screen')));
+                setState(() {
+                  _selectedIndex = 2;
+                });
+                widget.onScreenChange(const SettingsScreen());
                 Navigator.pop(context);
               },
             ),
             const Spacer(),
-            // Bottom Icon (e.g., Logout)
             Padding(
               padding: const EdgeInsets.only(bottom: 24),
               child: IconButton(
-                icon: const Icon(Icons.coffee_outlined),
+                icon: const Icon(Icons.coffee),
                 color: Colors.grey,
                 onPressed: () {
                   Navigator.pop(context);
@@ -137,17 +157,29 @@ class MenuScreen extends StatefulWidget {
 
 class _MenuScreenState extends State<MenuScreen> {
   Widget _currentScreen = const HomeScreen();
+  int _currentIndex = 0;  // 추가: 현재 화면 인덱스 추적
 
   void _changeScreen(Widget screen) {
     setState(() {
       _currentScreen = screen;
+      // 화면에 따라 인덱스 업데이트
+      if (screen is HomeScreen) {
+        _currentIndex = 0;
+      } else if (screen is SocialScreen) {
+        _currentIndex = 1;
+      } else if (screen is SettingsScreen) {
+        _currentIndex = 2;
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: CustomDrawer(onScreenChange: _changeScreen),
+      drawer: CustomDrawer(
+        onScreenChange: _changeScreen,
+        currentIndex: _currentIndex,  // 현재 인덱스 전달
+      ),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
