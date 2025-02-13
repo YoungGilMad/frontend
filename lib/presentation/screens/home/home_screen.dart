@@ -94,21 +94,36 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           // 메뉴 버튼들
-          Row(
+          Column(
             children: [
               _buildIconButton(
                 context,
-                Icons.stars,
+                Image.asset(
+                  'assets/icons/superhero.png',
+                  width: 25,      // 더 큰 크기
+                  height: 25,
+                  fit: BoxFit.contain,  // 이미지가 지정된 영역에 맞게 조정됨
+                ),
                 const HeroQuestScreen(),
               ),
               _buildIconButton(
                 context,
-                Icons.calendar_today,
+                Image.asset(
+                  'assets/icons/checklist.png',
+                  width: 25,      // 더 큰 크기
+                  height: 25,
+                  fit: BoxFit.contain,  // 이미지가 지정된 영역에 맞게 조정됨
+                ),
                 const DailyQuestScreen(),
               ),
               _buildIconButton(
                 context,
-                Icons.store,
+                Image.asset(
+                  'assets/icons/store.png',
+                  width: 25,      // 더 큰 크기
+                  height: 25,
+                  fit: BoxFit.contain,  // 이미지가 지정된 영역에 맞게 조정됨
+                ),
                 const StoreScreen(),
               ),
             ],
@@ -128,13 +143,13 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildIconButton(BuildContext context, IconData icon, Widget destination) {
+  Widget _buildIconButton(BuildContext context, Widget icon, Widget screen) {
     return IconButton(
-      icon: Icon(icon),
+      icon: icon,  // IconData 대신 Widget을 받도록 수정
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => destination),
+          MaterialPageRoute(builder: (context) => screen),
         );
       },
     );

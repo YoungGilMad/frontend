@@ -35,3 +35,5 @@ flutter:
   
   assets:
     - .env  # .env 파일을 assets에 추가
+    - assets/images/    # 이미지 파일들이 있는 폴더
+    - assets/icons/     # 아이콘 파일들이 있는 폴더
