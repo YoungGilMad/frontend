@@ -13,17 +13,17 @@ class RankingScreen extends StatelessWidget {
         children: [
           Expanded(
             child: ListView.builder(
-              itemCount: 10,
+              itemCount: 0,  // 실제 데이터 길이로 변경 필요
               itemBuilder: (context, index) {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.grey[200],
-                      child: Text('${index + 1}'),
+                      child: Text(''),  // 실제 순위 데이터 필요
                     ),
-                    title: Text('User ${index + 1}'),
-                    trailing: const Text('1000 pt'),
+                    title: Text(''),  // 실제 사용자 이름 데이터 필요
+                    trailing: const Text(''),  // 실제 포인트 데이터 필요
                   ),
                 );
               },

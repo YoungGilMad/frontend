@@ -124,7 +124,7 @@ class _SocialScreenState extends State<SocialScreen> {
                     margin: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: _screens[_selectedIndex],
                   ),
