@@ -1,3 +1,4 @@
+import 'package:app_beh/presentation/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -36,7 +37,8 @@ class MyApp extends StatelessWidget {
       title: 'BeHero',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,  // 여기서 AppTheme 적용
-      home: const InitialScreen(),
+      home: HomeScreen(),
+      // home: const InitialScreen(),
     );
   }
 }
