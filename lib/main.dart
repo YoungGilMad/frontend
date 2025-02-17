@@ -1,4 +1,3 @@
-import 'package:app_beh/presentation/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -11,9 +10,9 @@ import 'core/theme/app_theme.dart';  // AppTheme import 추가
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await dotenv.load(fileName: ".env");
-  
+
   final prefs = await SharedPreferences.getInstance();
   final authRepository = AuthRepository();
 
@@ -37,8 +36,7 @@ class MyApp extends StatelessWidget {
       title: 'BeHero',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,  // 여기서 AppTheme 적용
-      home: HomeScreen(),
-      // home: const InitialScreen(),
+      home: const InitialScreen(),
     );
   }
 }
