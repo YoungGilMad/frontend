@@ -1,24 +1,6 @@
 import 'package:flutter/material.dart';
-
-class QuestItem {
-  final String id;
-  final String title;
-  final String description;
-  final DateTime? deadline;
-  final bool isCompleted;
-  final String difficulty;
-  final DateTime createdAt;
-
-  QuestItem({
-    required this.id,
-    required this.title,
-    required this.description,
-    this.deadline,
-    this.isCompleted = false,
-    required this.difficulty,
-    required this.createdAt,
-  });
-}
+import '/data/models/quest_item_model.dart';
+import '/presentation/screens/quest/daily_quest_detail_screen.dart';
 
 class QuestListWidget extends StatelessWidget {
   final List<QuestItem> quests;
@@ -50,15 +32,15 @@ class QuestListWidget extends StatelessWidget {
             Text(
               '아직 등록된 퀘스트가 없습니다',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                color: Colors.grey[600],
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               '새로운 퀘스트를 추가해보세요!',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                color: Colors.grey[600],
+              ),
             ),
           ],
         ),
@@ -75,7 +57,6 @@ class QuestListWidget extends StatelessWidget {
             color: Colors.green,
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: const Icon(Icons.check_circle, color: Colors.white),
           ),
           secondaryBackground: Container(
             color: Colors.red,
@@ -96,32 +77,42 @@ class QuestListWidget extends StatelessWidget {
               vertical: 8,
             ),
             child: ListTile(
-              onTap: () => onQuestTap?.call(quest),
-              leading: Icon(
-                quest.isCompleted
-                    ? Icons.check_circle
-                    : Icons.radio_button_unchecked,
-                color: quest.isCompleted ? Colors.green : Colors.grey,
-              ),
+              onTap: () {
+                // ✅ 클릭 시 QuestDetailScreen으로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => QuestDetailScreen(quest: quest),
+                  ),
+                );
+              },
               title: Text(
                 quest.title,
                 style: TextStyle(
                   decoration:
-                      quest.isCompleted ? TextDecoration.lineThrough : null,
+                  quest.isCompleted ? TextDecoration.lineThrough : null,
                 ),
               ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(quest.description),
+                  Text(
+                    quest.isCompleted ? "완료!" : "진행중",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: quest.isCompleted ? Colors.green : Colors.blue,
+                    ),
+                  ),
                   if (quest.deadline != null)
                     Text(
                       '마감: ${_formatDeadline(quest.deadline!)}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: _isDeadlineNear(quest.deadline!)
-                                ? Colors.red
-                                : Colors.grey,
-                          ),
+                        color: _isDeadlineNear(quest.deadline!)
+                            ? Colors.red
+                            : Colors.grey,
+                      ),
                     ),
                 ],
               ),

@@ -3,8 +3,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../widgets/common/app_bar_widget.dart';
 import '../../widgets/quest/quest_list_widget.dart';
+import '/data/models/quest_item_model.dart';
 
 class DailyQuestScreen extends StatefulWidget {
+  // final int userId; // 사용자 ID
+
+  // const DailyQuestScreen({super.key, required this.userId});
+
   const DailyQuestScreen({super.key});
 
   @override
@@ -12,7 +17,10 @@ class DailyQuestScreen extends StatefulWidget {
 }
 
 class _DailyQuestScreenState extends State<DailyQuestScreen> {
+
   final List<QuestItem> _quests = [];
+  // List<Map<String, dynamic>> _quests = [];
+
   final List<String> tags = [
     '운동 및 스포츠',
     '공부',
@@ -23,11 +31,86 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
   ];
 
   final List<String> _days = ['월', '화', '수', '목', '금', '토', '일'];
-  final Map<String, bool> _selectedDays = {
+  Map<String, bool> _selectedDays = {
     '월': false, '화': false, '수': false,
     '목': false, '금': false, '토': false, '일': false,
   };
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _fetchQuests(); // 앱 실행 시 퀘스트 불러오기
+  // }
+
+  // /// 백엔드 통신 함수 (HTTP)
+  // // ✅ 퀘스트 리스트 조회 (GET 요청)
+  // Future<void> _fetchQuests() async {
+  //   final url = Uri.parse('https://your-api.com/quest/info/${widget.userId}');
+  //   final response = await http.get(url);
+  //
+  //   if (response.statusCode == 200) {
+  //     setState(() {
+  //       _quests = List<Map<String, dynamic>>.from(json.decode(response.body));
+  //     });
+  //   } else {
+  //     print("Error fetching quests: ${response.body}");
+  //   }
+  // }
+  //
+  // /// ✅ 새로운 퀘스트 생성 (POST 요청)
+  // Future<void> _createQuest(String todo) async {
+  //   final url = Uri.parse('https://your-api.com/quest/self-gen/${widget.userId}');
+  //   final response = await http.post(
+  //     url,
+  //     headers: {"Content-Type": "application/json"},
+  //     body: json.encode({"todo": todo}),
+  //   );
+  //
+  //   if (response.statusCode == 200) {
+  //     _fetchQuests(); // ✅ 퀘스트 다시 불러오기
+  //   } else {
+  //     print("Error creating quest: ${response.body}");
+  //   }
+  // }
+  //
+  // /// ✅ 퀘스트 완료 처리 (POST 요청)
+  // Future<void> _completeQuest(int questId) async {
+  //   final url = Uri.parse('https://your-api.com/quest/self-clear/$questId');
+  //   final response = await http.post(url);
+  //
+  //   if (response.statusCode == 200) {
+  //     _fetchQuests(); // ✅ 완료 후 퀘스트 목록 갱신
+  //   } else {
+  //     print("Error completing quest: ${response.body}");
+  //   }
+  // }
+  //
+  // /// ✅ 퀘스트 삭제 (DELETE 요청)
+  // Future<void> _deleteQuest(int questId) async {
+  //   final url = Uri.parse('https://your-api.com/quest/remove/$questId');
+  //   final response = await http.delete(url);
+  //
+  //   if (response.statusCode == 200) {
+  //     _fetchQuests(); // ✅ 삭제 후 퀘스트 목록 갱신
+  //   } else {
+  //     print("Error deleting quest: ${response.body}");
+  //   }
+  // }
+
+  // 난이도
+  String getDifficulty(int selectedHours) {
+    if (selectedHours >= 0 && selectedHours < 2) {
+      return 'easy'; // 0, 1
+    } else if (selectedHours > 1 && selectedHours < 5) {
+      return 'medium'; // 2, 3, 4
+    } else if (selectedHours > 4 && selectedHours < 7) {
+      return 'hard'; // 5, 6
+    } else {
+      return 'UNKNOWN'; // 범위를 벗어난 경우 기본값
+    }
+  }
+
+  // 퀘스트 생성 다이얼로그
   void _showQuestCreationDialog() {
     final TextEditingController titleController = TextEditingController();
     final TextEditingController contentController = TextEditingController();
@@ -36,8 +119,8 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
     int selectedMinutes = 0;
 
     showDialog(
-      context: context,
-      builder: (context) => Dialog(
+      context: context, builder: (context) => StatefulBuilder(  // StatefulBuilder 추가
+      builder: (context, setDialogState) => Dialog(
         insetPadding: const EdgeInsets.all(16),
         child: Container(
           width: double.infinity,
@@ -56,22 +139,30 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                 const SizedBox(height: 24),
                 
                 // 제목 입력
+                Text(
+                  "제목",
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
                 TextField(
                   controller: titleController,
                   decoration: const InputDecoration(
-                    labelText: '제목',
-                    hintText: '퀘스트 제목을 입력하세요',
+                    hintText: '퀘스트 제목을 입력하세요.',
                     border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 16),
                 
                 // 내용 입력
+                Text(
+                  "내용",
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
                 TextField(
                   controller: contentController,
                   maxLines: 3,
                   decoration: const InputDecoration(
-                    labelText: '내용',
                     hintText: '퀘스트 내용을 입력하세요',
                     border: OutlineInputBorder(),
                     alignLabelWithHint: true,
@@ -152,22 +243,29 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                 ),
                 const SizedBox(height: 8),
                 Wrap(
+                  // key: ValueKey(_selectedDays.hashCode), // 강제 리빌드 -> 색상 초기화
                   spacing: 8,
                   children: _days.map((day) {
-                    return FilterChip(
-                      label: Text(day),
-                      selected: _selectedDays[day]!,
-                      onSelected: (bool selected) {
-                        setState(() {
-                          _selectedDays[day] = selected;
+                    return GestureDetector(
+                      onTap: () {
+                        setDialogState(() {
+                          _selectedDays[day] = !_selectedDays[day]!; // ✅ 클릭 시 즉시 상태 변경
+                          // 디버깅 코드
+                          print("선택된 요일: $_selectedDays");
                         });
                       },
-                      selectedColor: Theme.of(context).colorScheme.primary,
-                      checkmarkColor: Colors.white,
-                      labelStyle: TextStyle(
-                        color: _selectedDays[day]!
-                            ? Colors.white
-                            : Theme.of(context).textTheme.bodyMedium?.color,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: _selectedDays[day]! ? Theme.of(context).colorScheme.primary : Colors.grey[300], // ✅ 선택 시 색상 변경
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          day,
+                          style: TextStyle(
+                            color: _selectedDays[day]! ? Colors.white : Colors.black, // ✅ 선택 여부에 따라 텍스트 색 변경
+                          ),
+                        ),
                       ),
                     );
                   }).toList(),
@@ -215,13 +313,19 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                           id: DateTime.now().millisecondsSinceEpoch.toString(),
                           title: titleController.text,
                           description: contentController.text,
-                          difficulty: 'medium',
+                          difficulty: getDifficulty(selectedHours),
                           deadline: null,
                           createdAt: DateTime.now(),
                         );
 
+                        _selectedDays = {
+                          '월': false, '화': false, '수': false,
+                          '목': false, '금': false, '토': false, '일': false,
+                        };
+
                         setState(() {
-                          _quests.add(newQuest);
+                          _addQuest(newQuest);
+                          // 요일 리셋
                         });
 
                         Navigator.pop(context);
@@ -235,6 +339,7 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -351,10 +456,17 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
     );
   }
 
+  void _addQuest(QuestItem quest) {
+    setState(() {
+      _quests.insert(0, quest);
+    });
+  }
+
   void _editQuest(QuestItem quest) {
     // TODO: 퀘스트 수정 구현
   }
 
+  /// 아래 코드는 새로운 api 통신 메서드로 대체
   void _completeQuest(QuestItem quest) {
     setState(() {
       final index = _quests.indexWhere((q) => q.id == quest.id);
@@ -370,3 +482,16 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
     });
   }
 }
+
+/**
+ * 할 일
+ * 1. 퀘스트 쌓이는 순서 위로 쌓이게 변경 v
+ * - 생성하는 창 다시 키면 요일 다시 false로 v
+ * 2. 클릭하면 퀘스트 상세정보창으로 넘어가게 변경
+ * - 일단 ui는 구현 완료
+ * 3. 난이도 관련 이슈 해결 -> 시간에 따라 정해지게 알고리즘
+ * -
+ * 4. 백엔드에 퀘스트 데이터 만들어지도록 설정
+ * 5. 퀘스트 수정 및 삭제 기능 구현
+ * - 악용 방지를 위해 퀘스트를 수정 시
+ */
