@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../data/models/user_model.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import 'character_detail_widget.dart';
+import 'animated_character_widget.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HeroStatusWidget extends StatelessWidget {
   const HeroStatusWidget({super.key});
+
+  @override
+  // lib/widgets/home/hero_status_widget.dart의 일부
 
   @override
   Widget build(BuildContext context) {
@@ -27,21 +31,13 @@ class HeroStatusWidget extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // 캐릭터 아바타 및 기본 정보
-              Row(
+              // 기본 정보
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeroAvatar(context),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildHeroInfo(context, authProvider),
-                        const SizedBox(height: 8),
-                        _buildExperienceBar(context),
-                      ],
-                    ),
-                  ),
+                  _buildHeroInfo(context, authProvider),
+                  const SizedBox(height: 8),
+                  _buildExperienceBar(context),
                 ],
               ),
               const SizedBox(height: 16),
@@ -54,43 +50,43 @@ class HeroStatusWidget extends StatelessWidget {
     );
   }
 
+// _buildHeroAvatar 메서드는 제거
+
   Widget _buildHeroAvatar(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Theme.of(context).colorScheme.primary,
-              width: 2,
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const CharacterDetailWidget(),
           ),
-          child: const Icon(
-            Icons.person,
-            size: 40,
-            color: Colors.grey,
-          ),
+        );
+      },
+      child: SizedBox(
+        width: 80,
+        height: 80,
+        child: Stack(
+          children: [
+            const AnimatedCharacterWidget(),  // 새로 만든 위젯 사용
+            // Positioned(
+            //   right: 0,
+            //   bottom: 0,
+            //   // child: Container(
+            //   //   padding: const EdgeInsets.all(4),
+            //   //   decoration: BoxDecoration(
+            //   //     color: Theme.of(context).colorScheme.primary,
+            //   //     shape: BoxShape.circle,
+            //   //   ),
+            //   //   child: const Icon(
+            //   //     Icons.edit,
+            //   //     size: 16,
+            //   //     color: Colors.white,
+            //   //   ),
+            //   // ),
+            // ),
+          ],
         ),
-        Positioned(
-          right: 0,
-          bottom: 0,
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.edit,
-              size: 16,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 

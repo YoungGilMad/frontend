@@ -11,9 +11,9 @@ import 'core/theme/app_theme.dart';  // AppTheme import 추가
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await dotenv.load(fileName: ".env");
-  
+
   final prefs = await SharedPreferences.getInstance();
   final authRepository = AuthRepository();
 

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../providers/auth_provider.dart';
 import '../../widgets/home/hero_status_widget.dart';
 import '../../widgets/home/progress_chart_widget.dart';
 import '../../widgets/home/action_buttons_widget.dart';
+import '../../widgets/home/calender_widget.dart';
 import '../quest/daily_quest_screen.dart';
 import '../quest/hero_quest_screen.dart';
 import '../store/store_screen.dart';
+import '../../widgets/home/animated_character_widget.dart';  // 경로를 확인해주세요
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -26,12 +28,14 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     // 상단 프로필 및 메뉴 영역
                     _buildHeader(context, authProvider),
-                    
+
+                    _buildCharacterSection(),
+
                     // 캐릭터 영역
                     const HeroStatusWidget(),
                     
                     // 진행 상태 영역
-                    _buildProgressSection(context),
+                    // _buildProgressSection(context),
                     
                     // 통계 그래프
                     const ProgressChartWidget(),
@@ -40,7 +44,8 @@ class HomeScreen extends StatelessWidget {
                     _buildActivitySummary(context),
                     
                     // 하단 버튼들
-                    const ActionButtonsWidget(),
+                    // const ActionButtonsWidget(),
+                    const CalendarWidget(),
                     
                     const SizedBox(height: 32),
                   ],
@@ -78,35 +83,46 @@ class HomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    authProvider.user?.nickname ?? '용사님',
+                    authProvider.user?.nickname ?? 'GD',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
-                  ),
-                  Text(
-                    'Lv. ${authProvider.user?.level ?? 1}',
-                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
               ),
             ],
           ),
           // 메뉴 버튼들
-          Row(
+          Column(
             children: [
               _buildIconButton(
                 context,
-                Icons.stars,
+                Image.asset(
+                  'assets/icons/superhero.png',
+                  width: 25,      // 더 큰 크기
+                  height: 25,
+                  fit: BoxFit.contain,  // 이미지가 지정된 영역에 맞게 조정됨
+                ),
                 const HeroQuestScreen(),
               ),
               _buildIconButton(
                 context,
-                Icons.calendar_today,
+                Image.asset(
+                  'assets/icons/checklist.png',
+                  width: 25,      // 더 큰 크기
+                  height: 25,
+                  fit: BoxFit.contain,  // 이미지가 지정된 영역에 맞게 조정됨
+                ),
                 const DailyQuestScreen(),
               ),
               _buildIconButton(
                 context,
-                Icons.store,
+                Image.asset(
+                  'assets/icons/store.png',
+                  width: 25,      // 더 큰 크기
+                  height: 25,
+                  fit: BoxFit.contain,  // 이미지가 지정된 영역에 맞게 조정됨
+                ),
                 const StoreScreen(),
               ),
             ],
@@ -116,46 +132,56 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildIconButton(BuildContext context, IconData icon, Widget destination) {
+  Widget _buildCharacterSection() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      height: 200,
+      child: const Center(
+        child: AnimatedCharacterWidget(),
+      ),
+    );
+  }
+
+  Widget _buildIconButton(BuildContext context, Widget icon, Widget screen) {
     return IconButton(
-      icon: Icon(icon),
+      icon: icon,  // IconData 대신 Widget을 받도록 수정
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => destination),
+          MaterialPageRoute(builder: (context) => screen),
         );
       },
     );
   }
 
-  Widget _buildProgressSection(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '궁극의 경지',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: 0.7,
-              minHeight: 8,
-              backgroundColor: Colors.grey[200],
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Theme.of(context).primaryColor,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildProgressSection(BuildContext context) {
+  //   return Container(
+  //     margin: const EdgeInsets.symmetric(vertical: 24.0),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           '궁극의 경지',
+  //           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+  //                 fontWeight: FontWeight.bold,
+  //               ),
+  //         ),
+  //         const SizedBox(height: 8),
+  //         ClipRRect(
+  //           borderRadius: BorderRadius.circular(8),
+  //           child: LinearProgressIndicator(
+  //             value: 0.7,
+  //             minHeight: 8,
+  //             backgroundColor: Colors.grey[200],
+  //             valueColor: AlwaysStoppedAnimation<Color>(
+  //               Theme.of(context).primaryColor,
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildActivitySummary(BuildContext context) {
     return Container(
