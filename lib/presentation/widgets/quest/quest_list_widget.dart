@@ -3,10 +3,10 @@ import '/data/models/quest_item_model.dart';
 import '/presentation/screens/quest/daily_quest_detail_screen.dart';
 
 class QuestListWidget extends StatelessWidget {
-  final List<QuestItem> quests;
-  final Function(QuestItem)? onQuestTap;
-  final Function(QuestItem)? onQuestComplete;
-  final Function(QuestItem)? onQuestDelete;
+  final List<QuestItemModel> quests;
+  final Function(QuestItemModel)? onQuestTap;
+  final Function(QuestItemModel)? onQuestComplete;
+  final Function(QuestItemModel)? onQuestDelete;
 
   const QuestListWidget({
     super.key,
