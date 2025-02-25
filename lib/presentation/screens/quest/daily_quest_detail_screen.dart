@@ -4,7 +4,7 @@ import '../../widgets/quest/quest_list_widget.dart';
 import '/data/models/quest_item_model.dart';
 
 class QuestDetailScreen extends StatefulWidget {
-  final QuestItem quest;
+  final QuestItemModel quest;
 
   const QuestDetailScreen({super.key, required this.quest});
 

@@ -18,7 +18,7 @@ class DailyQuestScreen extends StatefulWidget {
 
 class _DailyQuestScreenState extends State<DailyQuestScreen> {
 
-  final List<QuestItem> _quests = [];
+  final List<QuestItemModel> _quests = [];
   // List<Map<String, dynamic>> _quests = [];
 
   final List<String> tags = [
@@ -45,7 +45,7 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
   // /// 백엔드 통신 함수 (HTTP)
   // // ✅ 퀘스트 리스트 조회 (GET 요청)
   // Future<void> _fetchQuests() async {
-  //   final url = Uri.parse('https://your-api.com/quest/info/${widget.userId}');
+  //   final url = Uri.parse('https://localhost:8080/quest/info/${widget.userId}');
   //   final response = await http.get(url);
   //
   //   if (response.statusCode == 200) {
@@ -59,7 +59,7 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
   //
   // /// ✅ 새로운 퀘스트 생성 (POST 요청)
   // Future<void> _createQuest(String todo) async {
-  //   final url = Uri.parse('https://your-api.com/quest/self-gen/${widget.userId}');
+  //   final url = Uri.parse('https://localhost:8080/quest/self-gen/${widget.userId}');
   //   final response = await http.post(
   //     url,
   //     headers: {"Content-Type": "application/json"},
@@ -75,7 +75,7 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
   //
   // /// ✅ 퀘스트 완료 처리 (POST 요청)
   // Future<void> _completeQuest(int questId) async {
-  //   final url = Uri.parse('https://your-api.com/quest/self-clear/$questId');
+  //   final url = Uri.parse('https://localhost:8080/quest/self-clear/$questId');
   //   final response = await http.post(url);
   //
   //   if (response.statusCode == 200) {
@@ -87,7 +87,7 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
   //
   // /// ✅ 퀘스트 삭제 (DELETE 요청)
   // Future<void> _deleteQuest(int questId) async {
-  //   final url = Uri.parse('https://your-api.com/quest/remove/$questId');
+  //   final url = Uri.parse('https://localhost:8080/quest/remove/$questId');
   //   final response = await http.delete(url);
   //
   //   if (response.statusCode == 200) {
@@ -309,7 +309,7 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                       onPressed: () {
                         if (titleController.text.isEmpty) return;
                         
-                        final newQuest = QuestItem(
+                        final newQuest = QuestItemModel(
                           id: DateTime.now().millisecondsSinceEpoch.toString(),
                           title: titleController.text,
                           description: contentController.text,
@@ -456,18 +456,18 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
     );
   }
 
-  void _addQuest(QuestItem quest) {
+  void _addQuest(QuestItemModel quest) {
     setState(() {
       _quests.insert(0, quest);
     });
   }
 
-  void _editQuest(QuestItem quest) {
+  void _editQuest(QuestItemModel quest) {
     // TODO: 퀘스트 수정 구현
   }
 
-  /// 아래 코드는 새로운 api 통신 메서드로 대체
-  void _completeQuest(QuestItem quest) {
+  void _completeQuest(QuestItemModel quest) {
+    // ui
     setState(() {
       final index = _quests.indexWhere((q) => q.id == quest.id);
       if (index != -1) {
@@ -476,7 +476,8 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
     });
   }
 
-  void _deleteQuest(QuestItem quest) {
+  void _deleteQuest(QuestItemModel quest) {
+    // ui
     setState(() {
       _quests.removeWhere((q) => q.id == quest.id);
     });
@@ -493,5 +494,5 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
  * -
  * 4. 백엔드에 퀘스트 데이터 만들어지도록 설정
  * 5. 퀘스트 수정 및 삭제 기능 구현
- * - 악용 방지를 위해 퀘스트를 수정 시
+ * - 악용 방지를 위해 퀘스트를 수정 시..?
  */
