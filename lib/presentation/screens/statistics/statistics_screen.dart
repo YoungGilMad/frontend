@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../data/models/statistics_model.dart';
+import '../../providers/statistics_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_bar_widget.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -17,6 +21,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    
+    // 화면이 처음 로드될 때 통계 데이터 가져오기
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      if (authProvider.isAuthenticated && authProvider.user != null) {
+        context.read<StatisticsProvider>().loadStatistics();
+      }
+    });
   }
 
   @override
@@ -27,33 +39,49 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBarWidget(
-        title: '통계',
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: '요약'),
-            Tab(text: '캘린더'),
-            Tab(text: '태그'),
-            Tab(text: '주간'),
-          ],
-          isScrollable: false,
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildSummaryTab(),
-          _buildCalendarTab(),
-          _buildTagsTab(),
-          _buildWeeklyTab(),
-        ],
-      ),
+    return Consumer<StatisticsProvider>(
+      builder: (context, statisticsProvider, child) {
+        return Scaffold(
+          appBar: AppBarWidget(
+            title: '통계',
+            bottom: TabBar(
+              controller: _tabController,
+              tabs: const [
+                Tab(text: '요약'),
+                Tab(text: '캘린더'),
+                Tab(text: '태그'),
+                Tab(text: '주간'),
+              ],
+              isScrollable: false,
+            ),
+          ),
+          body: statisticsProvider.status == StatisticsLoadingStatus.loading
+              ? const Center(child: CircularProgressIndicator())
+              : statisticsProvider.error != null
+                  ? _buildErrorState(context, statisticsProvider.error!)
+                  : TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildSummaryTab(statisticsProvider),
+                        _buildCalendarTab(statisticsProvider),
+                        _buildTagsTab(statisticsProvider),
+                        _buildWeeklyTab(statisticsProvider),
+                      ],
+                    ),
+        );
+      },
     );
   }
 
-  Widget _buildSummaryTab() {
+  // 요약 탭을 StatisticsProvider의 데이터로 업데이트
+  Widget _buildSummaryTab(StatisticsProvider provider) {
+    final statistics = provider.statistics;
+    if (statistics == null) {
+      return const Center(child: Text('데이터가 없습니다'));
+    }
+
+    final summary = statistics.summary;
+    
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -63,10 +91,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
             title: '총 활동 통계',
             child: Column(
               children: [
-                _buildStatItem('총 완료 퀘스트', '324개'),
-                _buildStatItem('획득한 경험치', '12,450 XP'),
-                _buildStatItem('현재 레벨', 'Lv. 25'),
-                _buildStatItem('평균 일일 활동', '4.2시간'),
+                _buildStatItem('총 완료 퀘스트', '${summary.completedQuests}개'),
+                _buildStatItem('획득한 경험치', '${summary.totalXp} XP'),
+                _buildStatItem('현재 레벨', 'Lv. ${Provider.of<AuthProvider>(context).user?.level ?? 1}'),
+                _buildStatItem('평균 일일 활동', '${summary.avgDailyActivity}시간'),
               ],
             ),
           ),
@@ -77,24 +105,24 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
               children: [
                 _buildAchievementItem(
                   '연속 달성',
-                  '7일',
+                  '${summary.streakDays}일',
                   Icons.local_fire_department,
                   Colors.orange,
-                  0.7,
+                  summary.streakDays / 10,  // 예: 10일 기준
                 ),
                 _buildAchievementItem(
                   '월간 목표',
-                  '85%',
+                  '${summary.monthlyGoalPercentage}%',
                   Icons.star,
                   Colors.amber,
-                  0.85,
+                  summary.monthlyGoalPercentage / 100,
                 ),
                 _buildAchievementItem(
                   '레벨업 진행',
-                  '60%',
+                  '${summary.levelProgressPercentage}%',
                   Icons.trending_up,
                   Colors.green,
-                  0.6,
+                  summary.levelProgressPercentage / 100,
                 ),
               ],
             ),
@@ -104,7 +132,51 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
     );
   }
 
-  Widget _buildCalendarTab() {
+  Widget _buildErrorState(BuildContext context, String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, color: Colors.red, size: 48),
+          const SizedBox(height: 16),
+          Text(
+            '데이터를 불러오는데 실패했습니다',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              context.read<StatisticsProvider>().loadStatistics();
+            },
+            child: const Text('다시 시도'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 캘린더 탭을 StatisticsProvider의 데이터로 업데이트
+  Widget _buildCalendarTab(StatisticsProvider provider) {
+    final statistics = provider.statistics;
+    if (statistics == null || statistics.calendar.isEmpty) {
+      return const Center(child: Text('캘린더 데이터가 없습니다'));
+    }
+
+    // 캘린더 아이템을 날짜별로 정렬하고 그리드로 표시
+    final calendarItems = statistics.calendar;
+    final Map<int, CalendarItem> dayMap = {};
+    
+    for (var item in calendarItems) {
+      final day = int.tryParse(item.date.split('-').last) ?? 0;
+      dayMap[day] = item;
+    }
+
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -113,15 +185,26 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
       ),
-      itemCount: 31, // Example for a month
+      itemCount: 31, // 한 달을 기준으로 31일
       itemBuilder: (context, index) {
-        final activityLevel = index % 4; // Mock activity levels (0-3)
-        return _buildCalendarDay(index + 1, activityLevel);
+        final day = index + 1;
+        final calendarItem = dayMap[day];
+        final activityLevel = calendarItem?.activityLevel ?? 0;
+        
+        return _buildCalendarDay(day, activityLevel);
       },
     );
   }
+  
+  // 태그 탭을 StatisticsProvider의 데이터로 업데이트
+  Widget _buildTagsTab(StatisticsProvider provider) {
+    final statistics = provider.statistics;
+    if (statistics == null || statistics.tags.isEmpty) {
+      return const Center(child: Text('태그 데이터가 없습니다'));
+    }
 
-  Widget _buildTagsTab() {
+    final tags = statistics.tags;
+    
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -130,7 +213,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
             aspectRatio: 1.5,
             child: PieChart(
               PieChartData(
-                sections: _getMockPieData(),
+                sections: tags.map((tag) => PieChartSectionData(
+                  value: tag.percentage.toDouble(),
+                  title: '${tag.percentage}%',
+                  color: _getTagColor(tag.name),
+                  radius: 50,
+                )).toList(),
                 centerSpaceRadius: 40,
                 sectionsSpace: 0,
               ),
@@ -139,12 +227,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
           const SizedBox(height: 16),
           Expanded(
             child: ListView.builder(
-              itemCount: 5,
+              itemCount: tags.length,
               itemBuilder: (context, index) {
+                final tag = tags[index];
                 return _buildTagItem(
-                  '태그 ${index + 1}',
-                  '${(index + 1) * 15}회',
-                  _getMockPieData()[index].color,
+                  tag.name,
+                  '${tag.count}회',
+                  _getTagColor(tag.name),
                 );
               },
             ),
@@ -153,8 +242,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
       ),
     );
   }
+  
+  // 주간 활동 탭을 StatisticsProvider의 데이터로 업데이트
+  Widget _buildWeeklyTab(StatisticsProvider provider) {
+    final statistics = provider.statistics;
+    if (statistics == null || statistics.weekly.isEmpty) {
+      return const Center(child: Text('주간 활동 데이터가 없습니다'));
+    }
 
-  Widget _buildWeeklyTab() {
+    final weeklyData = statistics.weekly;
+    
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -163,7 +260,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
             aspectRatio: 1.7,
             child: BarChart(
               BarChartData(
-                barGroups: _getMockBarData(),
+                barGroups: _getBarData(weeklyData),
                 gridData: FlGridData(show: false),
                 titlesData: FlTitlesData(
                   leftTitles: AxisTitles(
@@ -175,12 +272,30 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
                   topTitles: AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
                   ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 22,
+                      getTitlesWidget: (value, meta) {
+                        if (value < 0 || value >= weeklyData.length) {
+                          return const Text('');
+                        }
+                        final index = value.toInt();
+                        final day = weeklyData[index].date.split(' ').last;
+                        return Text(
+                          day,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        );
+                      },
+                    ),
+                  ),
                 ),
+                borderData: FlBorderData(show: false),
               ),
             ),
           ),
           const SizedBox(height: 24),
-          _buildWeeklySummaryCard(),
+          _buildWeeklySummaryCard(weeklyData),
         ],
       ),
     );
@@ -307,7 +422,48 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
     );
   }
 
-  Widget _buildWeeklySummaryCard() {
+  // 태그 색상을 결정하는 메소드 추가
+  Color _getTagColor(String tagName) {
+    final Map<String, Color> tagColors = {
+      '운동 및 스포츠': Colors.blue,
+      '공부': Colors.green,
+      '자기개발': Colors.orange,
+      '취미': Colors.purple,
+      '명상 및 스트레칭': Colors.red,
+      '기타': Colors.grey,
+    };
+    
+    return tagColors[tagName] ?? Colors.grey;
+  }
+
+  // ActivityData 리스트를 바 차트 데이터로 변환
+  List<BarChartGroupData> _getBarData(List<ActivityData> activityData) {
+    return List.generate(activityData.length, (index) {
+      final data = activityData[index];
+      return BarChartGroupData(
+        x: index,
+        barRods: [
+          BarChartRodData(
+            toY: data.completedQuests.toDouble(),
+            color: Theme.of(context).colorScheme.primary,
+            width: 20,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ],
+      );
+    });
+  }
+
+  // 주간 활동 요약 카드 업데이트
+  Widget _buildWeeklySummaryCard(List<ActivityData> weeklyData) {
+    // 주간 총합 계산
+    final totalCompletedQuests = weeklyData.fold<int>(
+        0, (sum, data) => sum + data.completedQuests);
+    final totalEarnedXp =
+        weeklyData.fold<int>(0, (sum, data) => sum + data.earnedXp);
+    final totalGoalAchievement =
+        weeklyData.fold<int>(0, (sum, data) => sum + data.goalAchievement);
+    
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -323,19 +479,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
             const SizedBox(height: 16),
             _buildWeeklySummaryItem(
               '완료한 퀘스트',
-              '23개',
+              '$totalCompletedQuests개',
               Icons.check_circle_outline,
               Colors.green,
             ),
             _buildWeeklySummaryItem(
               '획득한 경험치',
-              '2,450 XP',
+              '$totalEarnedXp XP',
               Icons.star_outline,
               Colors.amber,
             ),
             _buildWeeklySummaryItem(
               '달성한 목표',
-              '5/7',
+              '$totalGoalAchievement',
               Icons.flag_outlined,
               Colors.blue,
             ),
@@ -344,7 +500,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
       ),
     );
   }
-
   Widget _buildWeeklySummaryItem(
     String label,
     String value,

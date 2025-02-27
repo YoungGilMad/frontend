@@ -7,6 +7,8 @@ import 'presentation/providers/auth_provider.dart';
 import 'presentation/screens/auth/login_screen.dart';
 import 'presentation/screens/auth/register_screen.dart';
 import 'core/theme/app_theme.dart';  // AppTheme import 추가
+import 'data/repositories/statistics_repository.dart';
+import 'presentation/providers/statistics_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,14 +19,28 @@ void main() async {
   final authRepository = AuthRepository();
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AuthProvider(
-        authRepository: authRepository,
-        prefs: prefs,
+  MultiProvider(
+    providers: [
+      ChangeNotifierProvider(
+        create: (_) => AuthProvider(
+          authRepository: authRepository,
+          prefs: prefs,
+        ),
       ),
-      child: const MyApp(),
-    ),
-  );
+      ChangeNotifierProxyProvider<AuthProvider, StatisticsProvider?>(
+        create: (_) => null,
+        update: (_, authProvider, __) => authProvider.isAuthenticated && authProvider.user != null
+            ? StatisticsProvider(
+                repository: StatisticsRepository(),
+                token: authProvider.token!,
+                userId: authProvider.user!.id,
+              )
+            : null,
+      ),
+    ],
+    child: const MyApp(),
+  ),
+);
 }
 
 class MyApp extends StatelessWidget {
