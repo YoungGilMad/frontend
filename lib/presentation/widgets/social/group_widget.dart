@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'create_group_widget.dart';
 import 'join_group_widget.dart';
-import 'room_widget.dart';
+import '../../screens/social/group_room_screen.dart';
 
 class GroupWidget extends StatelessWidget {
   final List<GroupItem> groups;

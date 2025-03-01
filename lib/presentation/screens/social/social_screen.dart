@@ -123,7 +123,7 @@ class _SocialScreenState extends State<SocialScreen> {
                   child: Container(
                     margin: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: _screens[_selectedIndex],
