@@ -97,6 +97,7 @@ class QuestListWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(quest.description),
+                  const SizedBox(height: 8),
                   Text(
                     quest.isCompleted ? "완료!" : "진행중",
                     style: TextStyle(
