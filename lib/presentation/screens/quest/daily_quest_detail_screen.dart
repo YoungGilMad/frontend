@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import '../../widgets/quest/quest_list_widget.dart';
 import '/data/models/quest_item_model.dart';
 
 class QuestDetailScreen extends StatefulWidget {
@@ -14,20 +13,25 @@ class QuestDetailScreen extends StatefulWidget {
 
 class _QuestDetailScreenState extends State<QuestDetailScreen> {
   late Timer _timer;
-  int _elapsedSeconds = 0;
+  late int _elapsedSeconds; // 진행 시간 (초)
+  late int _totalSeconds;   // 완료 시간 (초)
   bool _isRunning = true;
 
   @override
   void initState() {
     super.initState();
+    _elapsedSeconds = widget.quest.progressTime.inSeconds; // ✅ quest에서 진행시간 가져오기
+    _totalSeconds = widget.quest.totalTime.inSeconds > 0 ? widget.quest.totalTime.inSeconds : 1; // ✅ 완료시간 가져오기
     _startTimer();
   }
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _elapsedSeconds++;
-      });
+      if (_elapsedSeconds < _totalSeconds) {
+        setState(() => _elapsedSeconds++);
+      } else {
+        _timer.cancel(); // 완료 시 타이머 중지
+      }
     });
   }
 
@@ -42,11 +46,7 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
     });
   }
 
-  double _getProgress() {
-    if (widget.quest.deadline == null) return 0.0;
-    final totalSeconds = widget.quest.deadline!.difference(widget.quest.createdAt).inSeconds;
-    return totalSeconds > 0 ? (_elapsedSeconds / totalSeconds).clamp(0.0, 1.0) : 1.0;
-  }
+  double _getProgress() => (_elapsedSeconds / _totalSeconds).clamp(0.0, 1.0);
 
   @override
   void dispose() {
@@ -54,49 +54,56 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
     super.dispose();
   }
 
+  String formatTime(int seconds) {
+    final hours = (seconds ~/ 3600).toString().padLeft(2, '0');
+    final minutes = ((seconds % 3600) ~/ 60).toString().padLeft(2, '0');
+    final secs = (seconds % 60).toString().padLeft(2, '0');
+    return "$hours:$minutes:$secs";
+  }
+
   @override
   Widget build(BuildContext context) {
-    final totalSeconds = widget.quest.deadline?.difference(widget.quest.createdAt).inSeconds ?? 1;
-    final elapsedSeconds = _elapsedSeconds;
-
-    String formatTime(int seconds) {
-      final hours = (seconds ~/ 3600).toString().padLeft(2, '0');
-      final minutes = ((seconds % 3600) ~/ 60).toString().padLeft(2, '0');
-      final secs = (seconds % 60).toString().padLeft(2, '0');
-      return "$hours:$minutes:$secs";
-    }
-
     return Scaffold(
-      appBar: AppBar(title: Text(widget.quest.title)),
+      appBar: AppBar(title: Text(widget.quest.isHero ? "영웅 퀘스트" : "자기주도 퀘스트")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ✅ 퀘스트 제목
+            Text(
+              widget.quest.title,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+
+            // ✅ 퀘스트 설명
             Text(widget.quest.description, style: Theme.of(context).textTheme.bodyLarge),
             const SizedBox(height: 16),
+
+            // ✅ 진행 시간 / 완료 시간 표시
             Text(
-              "${formatTime(elapsedSeconds)} / ${formatTime(totalSeconds)}",
+              "${formatTime(_elapsedSeconds)} / ${formatTime(_totalSeconds)}",
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
+
+            // ✅ 진행률 표시
             LinearProgressIndicator(
               value: _getProgress(),
               backgroundColor: Colors.grey[300],
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
             ),
             const SizedBox(height: 16),
+
+            // ✅ 타이머 제어 버튼
             Center(
               child: ElevatedButton(
                 onPressed: _toggleTimer,
-                child: _isRunning ?
-                  Icon(
-                    Icons.pause,
-                    color: Colors.white,
-                  ): Icon(
-                    Icons.play_arrow,
-                    color: Colors.white
-                  ),
+                child: Icon(
+                  _isRunning ? Icons.pause : Icons.play_arrow,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
@@ -105,7 +112,6 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
     );
   }
 }
-
 
 /*
 - 간단한 구조

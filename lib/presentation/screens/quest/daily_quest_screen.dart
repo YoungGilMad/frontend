@@ -137,7 +137,6 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
                 // 제목 입력
                 Text(
                   "제목",
@@ -152,7 +151,6 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
                 // 내용 입력
                 Text(
                   "내용",
@@ -169,7 +167,6 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
                 // 목표 시간 설정
                 Text(
                   '목표 시간',
@@ -308,7 +305,7 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                     FilledButton(
                       onPressed: () {
                         if (titleController.text.isEmpty) return;
-                        
+
                         final newQuest = QuestItemModel(
                           id: DateTime.now().millisecondsSinceEpoch.toString(),
                           title: titleController.text,
@@ -316,6 +313,7 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
                           difficulty: getDifficulty(selectedHours),
                           deadline: null,
                           createdAt: DateTime.now(),
+                          totalTime: Duration(hours: selectedHours, minutes: selectedMinutes, seconds: 0),
                         );
 
                         _selectedDays = {
