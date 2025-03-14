@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:async';
 import '/data/models/quest_item_model.dart';
+import 'package:app_beh/presentation/providers/auth_provider.dart';
 
 class QuestDetailScreen extends StatefulWidget {
   final QuestItemModel quest;
-
   const QuestDetailScreen({super.key, required this.quest});
 
   @override

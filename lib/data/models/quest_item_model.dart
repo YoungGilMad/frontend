@@ -2,13 +2,13 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'quest_item_model.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class QuestItemModel {
   final String id;
   final String title;
   final String description;
 
-  @JsonKey(name: 'deadline')
+  @JsonKey(name: 'deadline', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
   final DateTime? deadline;
 
   @JsonKey(name: 'is_completed', defaultValue: false)
@@ -16,7 +16,7 @@ class QuestItemModel {
 
   final String difficulty;
 
-  @JsonKey(name: 'created_at')
+  @JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
   final DateTime createdAt;
 
   @JsonKey(name: 'is_hero', defaultValue: false)
@@ -27,16 +27,18 @@ class QuestItemModel {
     fromJson: _durationFromSeconds,
     toJson: _durationToSeconds,
     defaultValue: Duration.zero,
+    includeIfNull: false,
   )
-  final Duration progressTime; // ✅ 진행 시간 추가
+  final Duration progressTime;
 
   @JsonKey(
     name: 'total_time',
     fromJson: _durationFromSeconds,
     toJson: _durationToSeconds,
     defaultValue: Duration.zero,
+    includeIfNull: false,
   )
-  final Duration totalTime; // ✅ 완료 시간 추가
+  final Duration totalTime;
 
   const QuestItemModel({
     required this.id,
@@ -47,8 +49,8 @@ class QuestItemModel {
     required this.difficulty,
     required this.createdAt,
     this.isHero = false,
-    this.progressTime = Duration.zero, // ✅ 기본값
-    this.totalTime = Duration.zero,    // ✅ 기본값
+    this.progressTime = Duration.zero,
+    this.totalTime = Duration.zero,
   });
 
   /// JSON → 객체 변환
@@ -58,7 +60,7 @@ class QuestItemModel {
   /// 객체 → JSON 변환
   Map<String, dynamic> toJson() => _$QuestItemModelToJson(this);
 
-  /// 객체 복사 메서드 (변경할 값만 지정)
+  /// 객체 복사 메서드
   QuestItemModel copyWith({
     String? id,
     String? title,
@@ -68,8 +70,8 @@ class QuestItemModel {
     String? difficulty,
     DateTime? createdAt,
     bool? isHero,
-    Duration? progressTime, // ✅ 추가
-    Duration? totalTime,    // ✅ 추가
+    Duration? progressTime,
+    Duration? totalTime,
   }) {
     return QuestItemModel(
       id: id ?? this.id,
@@ -80,8 +82,8 @@ class QuestItemModel {
       difficulty: difficulty ?? this.difficulty,
       createdAt: createdAt ?? this.createdAt,
       isHero: isHero ?? this.isHero,
-      progressTime: progressTime ?? this.progressTime, // ✅ 추가
-      totalTime: totalTime ?? this.totalTime,          // ✅ 추가
+      progressTime: progressTime ?? this.progressTime,
+      totalTime: totalTime ?? this.totalTime,
     );
   }
 
@@ -98,8 +100,8 @@ class QuestItemModel {
               difficulty == other.difficulty &&
               createdAt == other.createdAt &&
               isHero == other.isHero &&
-              progressTime == other.progressTime && // ✅ 비교 추가
-              totalTime == other.totalTime;         // ✅ 비교 추가
+              progressTime == other.progressTime &&
+              totalTime == other.totalTime;
 
   @override
   int get hashCode =>
@@ -111,15 +113,14 @@ class QuestItemModel {
       difficulty.hashCode ^
       createdAt.hashCode ^
       isHero.hashCode ^
-      progressTime.hashCode ^ // ✅ 해시 추가
-      totalTime.hashCode;     // ✅ 해시 추가
+      progressTime.hashCode ^
+      totalTime.hashCode;
 
   /// ✅ Duration ↔ int 변환 헬퍼
   static Duration _durationFromSeconds(int seconds) => Duration(seconds: seconds);
   static int _durationToSeconds(Duration duration) => duration.inSeconds;
-  /*
-    아래와 같이 사용
-      progressTime: Duration(hours: 1, minutes: 20, seconds: 11), // 진행시간
-      totalTime: Duration(hours: 3),
-   */
+
+  /// ✅ DateTime ↔ String 변환 헬퍼
+  static DateTime _dateTimeFromJson(String date) => DateTime.parse(date);
+  static String _dateTimeToJson(DateTime date) => date.toUtc().toIso8601String();
 }

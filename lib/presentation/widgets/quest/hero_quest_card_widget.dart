@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../screens/quest/daily_quest_detail_screen.dart';
+import '../../screens/quest/quest_detail_screen.dart';
 import '/data/models/quest_item_model.dart';
 
 class HeroQuestList extends StatelessWidget {

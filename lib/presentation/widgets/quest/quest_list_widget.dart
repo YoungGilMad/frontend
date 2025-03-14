@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '/data/models/quest_item_model.dart';
-import '/presentation/screens/quest/daily_quest_detail_screen.dart';
+import '/presentation/screens/quest/quest_detail_screen.dart';
 
 class QuestListWidget extends StatelessWidget {
   final List<QuestItemModel> quests;
