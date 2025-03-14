@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../widgets/social/ranking_widget.dart';
+import '../../widgets/social/ranking_list_widget.dart';
 
 class RankingScreen extends StatelessWidget {
   const RankingScreen({super.key});

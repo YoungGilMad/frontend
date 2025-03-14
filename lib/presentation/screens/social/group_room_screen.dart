@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../widgets/social/group_widget.dart';
+import '../../widgets/social/group_list_widget.dart';
+import '../../../data/models/group_item.dart';
+
 
 class RoomWidget extends StatelessWidget {
   final GroupItem group;
