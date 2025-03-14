@@ -37,8 +37,8 @@ class MyApp extends StatelessWidget {
       title: 'BeHero',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,  // 여기서 AppTheme 적용
-      home: HomeScreen(),
-      // home: const InitialScreen(),
+      home: const InitialScreen(),
+      // home: HomeScreen(),
     );
   }
 }
@@ -53,40 +53,40 @@ class InitialScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'BeHero',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 48),
-            FilledButton(  // ElevatedButton 대신 FilledButton 사용
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LoginScreen(),
-                  ),
-                );
-              },
-              child: const Text('Login'),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const RegisterScreen(),
-                  ),
-                );
-              },
-              child: const Text('Register'),
-            ),
-          ],
+          const Text(
+          'BeHero',
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+          ),
         ),
+        const SizedBox(height: 48),
+        FilledButton(  // ElevatedButton 대신 FilledButton 사용
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LoginScreen(),
+              ),
+            );
+          },
+          child: const Text('Login'),
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const RegisterScreen(),
+                ),
+              );
+            },
+            child: const Text('Register'),
       ),
+      ],
+    ),
+    ),
     );
   }
 }
