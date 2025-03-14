@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../menu/menu_screen.dart';  // HomeScreen import 추가
+import '../menu/menu_screen.dart';
+import '../onboarding/onboarding_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,7 +47,8 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
       try {
-        final success = await context.read<AuthProvider>().login(
+        final authProvider = context.read<AuthProvider>();
+        final success = await authProvider.login(
           _emailController.text,
           _passwordController.text,
         );
@@ -62,10 +64,15 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
 
-          // 홈 화면으로 이동 (이전 스택의 모든 화면 제거)
+          // 온보딩 완료 상태 확인
+          final onboardingCompleted = authProvider.prefs.getBool('onboarding_completed') ?? false;
+
+          // 온보딩 완료 여부에 따라 화면 이동
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-              builder: (context) => const MenuScreen(),
+              builder: (context) => onboardingCompleted 
+                ? const MenuScreen() 
+                : const OnboardingScreen(),
             ),
             (route) => false,  // 모든 이전 라우트 제거
           );

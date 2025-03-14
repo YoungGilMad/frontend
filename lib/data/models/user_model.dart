@@ -67,18 +67,21 @@ class UserModel {
   // Factory constructor for creating UserModel from login response
   factory UserModel.fromLoginResponse(Map<String, dynamic> json) {
     try {
+      // 만약 json에 user 필드가 포함되어 있다면 해당 필드 사용
+      final userData = json.containsKey('user') ? json['user'] : json;
+      
       return UserModel(
-        id: json['id'] as int? ?? 0,
-        email: json['email'] as String? ?? '',
-        name: json['name'] as String? ?? '',
-        profileImageUrl: json['profile_img'] as String?,
-        nickname: json['nickname'] as String? ?? json['name'] as String? ?? '',
-        level: json['hero_level'] as int? ?? 1,
-        joinDate: _dateFromJson(json['join_date']),
-        updateDate: _dateFromJson(json['update_date']),
-        coin: json['coin'] as int? ?? 0,
-        avatarId: json['avatar_id'] as int?,
-        backgroundId: json['background_id'] as int?,
+        id: userData['id'] as int? ?? 0,
+        email: userData['email'] as String? ?? '',
+        name: userData['name'] as String? ?? '',
+        profileImageUrl: userData['profile_img'] as String?,
+        nickname: userData['nickname'] as String? ?? userData['name'] as String? ?? '',
+        level: userData['hero_level'] as int? ?? 1,
+        joinDate: _dateFromJson(userData['join_date']),
+        updateDate: _dateFromJson(userData['update_date']),
+        coin: userData['coin'] as int? ?? 0,
+        avatarId: userData['avatar_id'] as int?,
+        backgroundId: userData['background_id'] as int?,
       );
     } catch (e) {
       print('Error creating UserModel from login response: $e');
@@ -86,7 +89,6 @@ class UserModel {
       rethrow;
     }
   }
-
   // Factory constructor for creating UserModel from register response
   factory UserModel.fromRegisterResponse(Map<String, dynamic> json) {
     try {

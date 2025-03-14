@@ -26,6 +26,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isAuthenticated => _token != null;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  SharedPreferences get prefs => _prefs;  // SharedPreferences 접근자 추가
 
   // 저장된 토큰 로드
   Future<void> _loadSavedToken() async {
