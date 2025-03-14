@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../onboarding/onboarding_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -77,55 +78,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
-  if (_formKey.currentState?.validate() ?? false) {
-    try {
-      final success = await context.read<AuthProvider>().register(
-        email: _emailController.text,
-        password: _passwordController.text,
-        name: _nameController.text,
-        phoneNumber: _phoneController.text,
-      );
-
-      if (success && mounted) {
-        // 회원가입 성공 시 로그인 화면으로 이동
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('회원가입이 완료되었습니다. 로그인해주세요.'),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.green,
-          ),
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        final success = await context.read<AuthProvider>().register(
+          email: _emailController.text,
+          password: _passwordController.text,
+          name: _nameController.text,
+          phoneNumber: _phoneController.text,
         );
-      }
-    } catch (e) {
-      // 에러 메시지 처리 개선
-      String errorMessage = '회원가입 중 오류가 발생했습니다.';
-      
-      if (e.toString().contains('Email already registered')) {
-        errorMessage = '이미 등록된 이메일입니다. 다른 이메일을 사용하거나 로그인해주세요.';
-      }
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Theme.of(context).colorScheme.error,
-            action: e.toString().contains('Email already registered') 
-                ? SnackBarAction(
-                    label: '로그인하기',
-                    textColor: Colors.white,
-                    onPressed: () {
-                      Navigator.of(context).pop(); // 현재 회원가입 화면 닫기
-                    },
-                  )
-                : null,
-          ),
-        );
+        if (success && mounted) {
+          // 회원가입 성공 시 온보딩 화면으로 이동
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const OnboardingScreen(isAfterRegistration: true),
+            ),
+          );
+        }
+      } catch (e) {
+        // 에러 메시지 처리 개선
+        String errorMessage = '회원가입 중 오류가 발생했습니다.';
+        
+        if (e.toString().contains('Email already registered')) {
+          errorMessage = '이미 등록된 이메일입니다. 다른 이메일을 사용하거나 로그인해주세요.';
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Theme.of(context).colorScheme.error,
+              action: e.toString().contains('Email already registered') 
+                  ? SnackBarAction(
+                      label: '로그인하기',
+                      textColor: Colors.white,
+                      onPressed: () {
+                        Navigator.of(context).pop(); // 현재 회원가입 화면 닫기
+                      },
+                    )
+                  : null,
+            ),
+          );
+        }
       }
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {

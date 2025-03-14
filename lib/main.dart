@@ -6,6 +6,7 @@ import 'data/repositories/auth_repository.dart';
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/screens/auth/login_screen.dart';
 import 'presentation/screens/auth/register_screen.dart';
+import 'presentation/screens/onboarding/onboarding_screen.dart';
 import 'core/theme/app_theme.dart';  // AppTheme import 추가
 import 'data/repositories/statistics_repository.dart';
 import 'presentation/providers/statistics_provider.dart';
@@ -53,6 +54,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,  // 여기서 AppTheme 적용
       home: const InitialScreen(),
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/onboarding': (context) => const OnboardingScreen(),
+      },
     );
   }
 }
@@ -62,6 +68,32 @@ class InitialScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    
+    // 토큰 확인 중
+    if (authProvider.isAuthenticated == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    
+    // 이미 로그인된 상태인지 확인
+    if (authProvider.isAuthenticated) {
+      // 온보딩 완료 여부 확인
+      final onboardingCompleted = authProvider.prefs.getBool('onboarding_completed') ?? false;
+      
+      // 온보딩을 완료하지 않았다면 온보딩 화면으로
+      if (!onboardingCompleted) {
+        return const OnboardingScreen();
+      }
+      
+      // 온보딩을 완료했다면 로그인 화면으로
+      return const LoginScreen();
+    }
+    
+    // 로그인되지 않은 상태
     return Scaffold(
       body: Center(
         child: Column(
@@ -77,24 +109,14 @@ class InitialScreen extends StatelessWidget {
             const SizedBox(height: 48),
             FilledButton(  // ElevatedButton 대신 FilledButton 사용
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LoginScreen(),
-                  ),
-                );
+                Navigator.pushNamed(context, '/login');
               },
               child: const Text('Login'),
             ),
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const RegisterScreen(),
-                  ),
-                );
+                Navigator.pushNamed(context, '/register');
               },
               child: const Text('Register'),
             ),
