@@ -29,7 +29,17 @@ class _FriendScreenState extends State<FriendScreen> {
       isOnline: true,
       isPremium: true,
       profileImage: null,
-      hasStory: false, // 초기에는 스토리 없음
+      hasStory: false,
+
+      // ✅ 추가된 필드 (랭킹, 경험치)
+      ranking: 1,
+      xp: 9500,
+
+      // ✅ 추가된 필드 (스탯 정보)
+      strength: 80,
+      agility: 75,
+      intelligence: 90,
+      stamina: 85,
     );
 
     friends = List.generate(
@@ -42,10 +52,21 @@ class _FriendScreenState extends State<FriendScreen> {
         isOnline: index % 3 == 0,
         isPremium: index % 5 == 0,
         profileImage: null,
-        hasStory: index % 4 == 0, // 샘플 친구들 중 일부는 스토리 있음
+        hasStory: index % 4 == 0,
+
+        // ✅ 추가된 필드 (랭킹, 경험치)
+        ranking: index + 2,
+        xp: 5000 + (index * 300),
+
+        // ✅ 추가된 필드 (스탯 정보)
+        strength: 50 + index,
+        agility: 60 + index,
+        intelligence: 55 + index,
+        stamina: 65 + index,
       ),
     );
   }
+
 
   void _searchFriends(String query) {
     setState(() {

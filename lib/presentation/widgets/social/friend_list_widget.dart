@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../screens/social/story_upload_screen.dart';
 import '../../../data/models/friend_item.dart';
+import '../../screens/social/friend_profile_screen.dart';
+import '../../screens/social/story_watch_screen.dart';
+
 
 class FriendListWidget extends StatefulWidget {
   final List<FriendItem> friends;
@@ -109,37 +112,43 @@ class _FriendListWidgetState extends State<FriendListWidget> {
               child: Row(
                 children: [
                   // 프로필 이미지 (스토리 있는 경우 빨간 테두리 추가)
+                  // 프로필 이미지 (스토리가 있을 때 클릭 가능)
                   Stack(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: friend.hasStory
-                              ? Border.all(color: Colors.blue, width: 3)
-                              : null,
-                        ),
-                        child: CircleAvatar(
-                          radius: 24,
-                          backgroundColor: Colors.grey[200],
-                          backgroundImage: friend.profileImage != null ? NetworkImage(friend.profileImage!) : null,
-                          child: friend.profileImage == null ? const Icon(Icons.person, color: Colors.grey) : null,
-                        ),
-                      ),
-                      if (friend.isOnline)
-                        Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: Colors.green,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
-                            ),
+                      GestureDetector(
+                        onTap: () {
+                          if (friend.hasStory) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StoryWatchScreen(
+                                  friendName: friend.name,
+                                  storyImageUrl: friend.profileImage, // 예제: 스토리 이미지는 프로필과 같다고 가정
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: friend.hasStory
+                                ? Border.all(color: Colors.blue, width: 3) // 스토리가 있을 때 테두리 강조
+                                : null,
+                          ),
+                          child: CircleAvatar(
+                            radius: 24,
+                            backgroundColor: Colors.grey[200],
+                            backgroundImage: friend.profileImage != null
+                                ? NetworkImage(friend.profileImage!)
+                                : null,
+                            child: friend.profileImage == null
+                                ? const Icon(Icons.person, color: Colors.grey)
+                                : null,
                           ),
                         ),
+                      ),
                     ],
                   ),
                   const SizedBox(width: 16),
@@ -152,37 +161,37 @@ class _FriendListWidgetState extends State<FriendListWidget> {
                         Row(
                           children: [
                             Text(
-                              isMe ? '내' : friend.name,
+                              isMe ? '나' : friend.name,
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                             ),
-                            if (friend.isPremium)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 4),
-                                child: Icon(Icons.verified, size: 16, color: Theme.of(context).colorScheme.primary),
-                              ),
+                            // if (friend.isPremium)
+                            //   Padding(
+                            //     padding: const EdgeInsets.only(left: 4),
+                            //     child: Icon(Icons.verified, size: 16, color: Theme.of(context).colorScheme.primary),
+                            //   ),
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(Icons.military_tech, size: 14, color: Theme.of(context).colorScheme.primary),
-                            const SizedBox(width: 4),
-                            Text('Lv.${friend.level}', style: Theme.of(context).textTheme.bodySmall),
-                            const SizedBox(width: 12),
-                            Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
-                            const SizedBox(width: 4),
-                            Text(
-                              friend.lastActive,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-                            ),
-                          ],
-                        ),
+                        // Row(
+                        //   children: [
+                        //     Icon(Icons.military_tech, size: 14, color: Theme.of(context).colorScheme.primary),
+                        //     const SizedBox(width: 4),
+                        //     Text('Lv.${friend.level}', style: Theme.of(context).textTheme.bodySmall),
+                        //     const SizedBox(width: 12),
+                        //     Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
+                        //     const SizedBox(width: 4),
+                        //     Text(
+                        //       friend.lastActive,
+                        //       style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                        //     ),
+                        //   ],
+                        // ),
                       ],
                     ),
                   ),
 
                   // 확장 표시기
-                  Icon(isExpanded ? Icons.expand_less : Icons.expand_more, color: Colors.grey[600]),
+                  // Icon(isExpanded ? Icons.expand_less : Icons.expand_more, color: Colors.grey[600]),
 
                   // 깨우기 버튼 (내가 아닌 경우에만)
                   if (!isMe)
@@ -211,10 +220,55 @@ class _FriendListWidgetState extends State<FriendListWidget> {
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: isMe ? _buildMyExpandedContent(context) : const SizedBox.shrink(),
+        child: isMe
+            ? _buildMyExpandedContent(context)
+            : _buildFriendExpandedContent(context, friend),
       ),
     );
   }
+
+  Widget _buildFriendExpandedContent(BuildContext context, FriendItem friend) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FriendProfileScreen(
+              name: friend.name,
+              level: friend.level,
+              ranking: friend.ranking,
+              xp: friend.xp,
+              maxXp: 10000, // 예제 값
+              strength: friend.strength,
+              agility: friend.agility,
+              intelligence: friend.intelligence,
+              stamina: friend.stamina,
+              profileImage: friend.profileImage,
+            ),
+          ),
+        );
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.person_outline, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 8),
+            Text(
+              '프로필 구경하기',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   Widget _buildMyExpandedContent(BuildContext context) {
     return Column(

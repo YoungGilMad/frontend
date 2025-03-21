@@ -6,7 +6,17 @@ class FriendItem {
   final bool isOnline;
   final bool isPremium;
   final String? profileImage;
-  bool hasStory; // 스토리 여부 필드 추가
+  bool hasStory;
+
+  // ✅ 기본값 추가 (랭킹, 경험치)
+  final int ranking;
+  final int xp;
+
+  // ✅ 기본값 추가 (스탯 정보)
+  final int strength;
+  final int agility;
+  final int intelligence;
+  final int stamina;
 
   FriendItem({
     required this.id,
@@ -16,6 +26,12 @@ class FriendItem {
     required this.isOnline,
     required this.isPremium,
     required this.profileImage,
-    this.hasStory = false, // 기본값 false
+    this.hasStory = false,
+    required this.ranking,  // ✅ null 방지
+    required this.xp,       // ✅ null 방지
+    required this.strength,  // ✅ null 방지
+    required this.agility,   // ✅ null 방지
+    required this.intelligence, // ✅ null 방지
+    required this.stamina,   // ✅ null 방지
   });
 }
