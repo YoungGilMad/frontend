@@ -1,10 +1,12 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'quest_item_model.g.dart';
+part "quest_item_model.g.dart";
 
 @JsonSerializable(explicitToJson: true)
 class QuestItemModel {
+  @JsonKey(fromJson: _fromDynamicToString)
   final String id;
+
   final String title;
   final String description;
 
@@ -123,4 +125,7 @@ class QuestItemModel {
   /// ✅ DateTime ↔ String 변환 헬퍼
   static DateTime _dateTimeFromJson(String date) => DateTime.parse(date);
   static String _dateTimeToJson(DateTime date) => date.toUtc().toIso8601String();
+
+  /// int값 id를 string으로 전환
+  static String _fromDynamicToString(dynamic value) => value.toString();
 }

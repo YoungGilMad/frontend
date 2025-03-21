@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart' as legacy_provider;
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:http/http.dart' as http;
@@ -21,26 +22,9 @@ class DailyQuestScreen extends StatefulWidget {
 class _DailyQuestScreenState extends State<DailyQuestScreen> {
   late int userId; // ✅ userId 동적으로 설정
   late String authToken; // ✅ JWT 인증 토큰
-  final String apiBaseUrl = "https://behero/quest"; // 🔹 백엔드 URL
+  final String apiBaseUrl = "${dotenv.env['API_BASE_URL']!}/quest"; // 🔹 백엔드 URL
 
   List<QuestItemModel> _quests = [];
-  // List<Map<String, dynamic>> _quests = [];
-
-  // final List<String> tags = [
-  //   '운동 및 스포츠',
-  //   '공부',
-  //   '자기개발',
-  //   '취미',
-  //   '명상 및 스트레칭',
-  //   '기타'
-  // ];
-  //
-  // final List<String> _days = ['월', '화', '수', '목', '금', '토', '일'];
-  // Map<String, bool> _selectedDays = {
-  //   '월': false, '화': false, '수': false,
-  //   '목': false, '금': false, '토': false, '일': false,
-  // };
-
 
   @override
   void initState() {
@@ -78,6 +62,7 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
         Uri.parse('$apiBaseUrl/list/$userId'), // 🔹 {user_id}를 실제 유저 ID로 변경해야 함
         headers: {'Authorization': 'Bearer $authToken'},
       );
+      print("userId: $userId");
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -101,8 +86,11 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(quest.toJson()),
+        body: jsonEncode({
+          "todo": quest.description,
+        }),
       );
+      print("userId: $userId");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
