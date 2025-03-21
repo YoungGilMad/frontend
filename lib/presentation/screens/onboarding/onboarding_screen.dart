@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../screens/menu/menu_screen.dart';
-import '../home/home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   final bool isAfterRegistration;

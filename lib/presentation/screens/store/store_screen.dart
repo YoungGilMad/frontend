@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_bar_widget.dart';
 import '../../widgets/store/store_item_grid.dart';
 

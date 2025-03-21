@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import 'character_detail_widget.dart';
-import 'animated_character_widget.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class HeroStatusWidget extends StatelessWidget {
   const HeroStatusWidget({super.key});
@@ -50,45 +47,7 @@ class HeroStatusWidget extends StatelessWidget {
     );
   }
 
-// _buildHeroAvatar 메서드는 제거
-
-  Widget _buildHeroAvatar(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const CharacterDetailWidget(),
-          ),
-        );
-      },
-      child: SizedBox(
-        width: 80,
-        height: 80,
-        child: Stack(
-          children: [
-            const AnimatedCharacterWidget(),  // 새로 만든 위젯 사용
-            // Positioned(
-            //   right: 0,
-            //   bottom: 0,
-            //   // child: Container(
-            //   //   padding: const EdgeInsets.all(4),
-            //   //   decoration: BoxDecoration(
-            //   //     color: Theme.of(context).colorScheme.primary,
-            //   //     shape: BoxShape.circle,
-            //   //   ),
-            //   //   child: const Icon(
-            //   //     Icons.edit,
-            //   //     size: 16,
-            //   //     color: Colors.white,
-            //   //   ),
-            //   // ),
-            // ),
-          ],
-        ),
-      ),
-    );
-  }
+// Method removed as it's not used
 
   Widget _buildHeroInfo(BuildContext context, AuthProvider authProvider) {
     return Row(

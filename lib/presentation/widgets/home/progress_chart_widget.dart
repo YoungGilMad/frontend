@@ -239,12 +239,7 @@ class _ProgressChartWidgetState extends State<ProgressChartWidget> {
   }
 
   Widget _buildStatsSummary(BuildContext context) {
-    String period = switch (_selectedPeriod) {
-      ChartPeriod.weekly => '이번 주',
-      ChartPeriod.monthly => '이번 달',
-      ChartPeriod.yearly => '올해',
-    };
-
+    // Simply removing the unused variable
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [

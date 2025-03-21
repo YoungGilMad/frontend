@@ -71,7 +71,7 @@ class InitialScreen extends StatelessWidget {
     final authProvider = Provider.of<AuthProvider>(context);
     
     // 토큰 확인 중
-    if (authProvider.isAuthenticated == null) {
+    if (authProvider.isLoading) {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
