@@ -53,7 +53,7 @@ class _QuestCreationDialogState extends State<QuestCreationDialog> {
       description: contentController.text,
       difficulty: getDifficulty(selectedHours),
       totalTime: Duration(hours: selectedHours, minutes: selectedMinutes),
-      questType: '', // 여기 수정
+      questType: 'self',
     );
 
     widget.onQuestCreated(newQuest);

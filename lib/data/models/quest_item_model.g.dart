@@ -24,6 +24,7 @@ QuestItemModel _$QuestItemModelFromJson(Map<String, dynamic> json) =>
       startTime: QuestItemModel._nullableDateTimeFromJson(json['start_time']),
       stopTime: QuestItemModel._nullableDateTimeFromJson(json['stop_time']),
       finishTime: QuestItemModel._nullableDateTimeFromJson(json['finish_time']),
+      deadline: QuestItemModel._nullableDateTimeFromJson(json['deadline']),
     );
 
 Map<String, dynamic> _$QuestItemModelToJson(QuestItemModel instance) =>
@@ -42,4 +43,5 @@ Map<String, dynamic> _$QuestItemModelToJson(QuestItemModel instance) =>
       'stop_time': QuestItemModel._nullableDateTimeToJson(instance.stopTime),
       'finish_time':
           QuestItemModel._nullableDateTimeToJson(instance.finishTime),
+      'deadline': QuestItemModel._nullableDateTimeToJson(instance.deadline),
     };
