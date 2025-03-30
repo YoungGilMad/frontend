@@ -65,7 +65,7 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.quest.isHero ? "영웅 퀘스트" : "자기주도 퀘스트")),
+      appBar: AppBar(title: Text(widget.quest.questType == 'hero'? "영웅 퀘스트" : "자기주도 퀘스트")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

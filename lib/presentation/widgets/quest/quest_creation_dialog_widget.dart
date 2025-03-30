@@ -52,9 +52,8 @@ class _QuestCreationDialogState extends State<QuestCreationDialog> {
       title: titleController.text,
       description: contentController.text,
       difficulty: getDifficulty(selectedHours),
-      deadline: null,
-      createdAt: DateTime.now(),
       totalTime: Duration(hours: selectedHours, minutes: selectedMinutes),
+      questType: '', // 여기 수정
     );
 
     widget.onQuestCreated(newQuest);

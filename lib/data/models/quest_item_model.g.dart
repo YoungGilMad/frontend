@@ -8,15 +8,22 @@ part of 'quest_item_model.dart';
 
 QuestItemModel _$QuestItemModelFromJson(Map<String, dynamic> json) =>
     QuestItemModel(
-      id: json['id'] as String,
+      id: QuestItemModel._fromDynamicToString(json['id']),
       title: json['title'] as String,
       description: json['description'] as String,
-      deadline: json['deadline'] == null
-          ? null
-          : DateTime.parse(json['deadline'] as String),
-      isCompleted: json['is_completed'] as bool? ?? false,
-      difficulty: json['difficulty'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      tag: json['tag'] as String?,
+      days: (json['days'] as num?)?.toInt(),
+      progressTime: json['progress_time'] == null
+          ? Duration.zero
+          : QuestItemModel._durationFromSeconds(
+              (json['progress_time'] as num).toInt()),
+      completeTime:
+          QuestItemModel._nullableDateTimeFromJson(json['complete_time']),
+      isCompleted: json['finish'] as bool? ?? false,
+      questType: json['quest_type'] as String,
+      startTime: QuestItemModel._nullableDateTimeFromJson(json['start_time']),
+      stopTime: QuestItemModel._nullableDateTimeFromJson(json['stop_time']),
+      finishTime: QuestItemModel._nullableDateTimeFromJson(json['finish_time']),
     );
 
 Map<String, dynamic> _$QuestItemModelToJson(QuestItemModel instance) =>
@@ -24,8 +31,15 @@ Map<String, dynamic> _$QuestItemModelToJson(QuestItemModel instance) =>
       'id': instance.id,
       'title': instance.title,
       'description': instance.description,
-      'deadline': instance.deadline?.toIso8601String(),
-      'is_completed': instance.isCompleted,
-      'difficulty': instance.difficulty,
-      'created_at': instance.createdAt.toIso8601String(),
+      'tag': instance.tag,
+      'days': instance.days,
+      'progress_time': QuestItemModel._durationToSeconds(instance.progressTime),
+      'complete_time':
+          QuestItemModel._nullableDateTimeToJson(instance.completeTime),
+      'finish': instance.isCompleted,
+      'quest_type': instance.questType,
+      'start_time': QuestItemModel._nullableDateTimeToJson(instance.startTime),
+      'stop_time': QuestItemModel._nullableDateTimeToJson(instance.stopTime),
+      'finish_time':
+          QuestItemModel._nullableDateTimeToJson(instance.finishTime),
     };
