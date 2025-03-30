@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart' as legacy_provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'dart:convert';
 import '../../widgets/common/app_bar_widget.dart';
 import '../../widgets/quest/quest_list_widget.dart';
 import '/data/models/quest_item_model.dart';
+import 'package:app_beh/presentation/providers/auth_provider.dart';
+import 'package:app_beh/presentation/widgets/quest/quest_creation_dialog_widget.dart';
 
 class DailyQuestScreen extends StatefulWidget {
-  // final int userId; // 사용자 ID
-
-  // const DailyQuestScreen({super.key, required this.userId});
 
   const DailyQuestScreen({super.key});
 
@@ -17,85 +20,134 @@ class DailyQuestScreen extends StatefulWidget {
 }
 
 class _DailyQuestScreenState extends State<DailyQuestScreen> {
+  late int userId; // ✅ userId 동적으로 설정
+  late String authToken; // ✅ JWT 인증 토큰
+  final String apiBaseUrl = "${dotenv.env['API_BASE_URL']!}/quest"; // 🔹 백엔드 URL
 
-  final List<QuestItemModel> _quests = [];
-  // List<Map<String, dynamic>> _quests = [];
+  List<QuestItemModel> _quests = [];
 
-  final List<String> tags = [
-    '운동 및 스포츠',
-    '공부',
-    '자기개발',
-    '취미',
-    '명상 및 스트레칭',
-    '기타'
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _initializeUserData(); // ✅ userId 및 토큰 설정 후 퀘스트 가져오기
+  }
 
-  final List<String> _days = ['월', '화', '수', '목', '금', '토', '일'];
-  Map<String, bool> _selectedDays = {
-    '월': false, '화': false, '수': false,
-    '목': false, '금': false, '토': false, '일': false,
-  };
+  /// ✅ `userId`와 `authToken` 설정
+  void _initializeUserData() {
+    final authProvider = legacy_provider.Provider.of<AuthProvider>(context, listen: false);
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _fetchQuests(); // 앱 실행 시 퀘스트 불러오기
-  // }
+    if (authProvider.user != null) {
+      userId = authProvider.user!.id;
+      authToken = authProvider.token ?? ''; // 토큰이 없을 경우 빈 문자열 처리
+      _fetchQuests(); // ✅ 데이터 가져오기
+    } else {
+      print("❌ 유저 정보 없음, 로그인 필요");
+    }
+  }
 
-  // /// 백엔드 통신 함수 (HTTP)
-  // // ✅ 퀘스트 리스트 조회 (GET 요청)
-  // Future<void> _fetchQuests() async {
-  //   final url = Uri.parse('https://localhost:8080/quest/info/${widget.userId}');
-  //   final response = await http.get(url);
-  //
-  //   if (response.statusCode == 200) {
-  //     setState(() {
-  //       _quests = List<Map<String, dynamic>>.from(json.decode(response.body));
-  //     });
-  //   } else {
-  //     print("Error fetching quests: ${response.body}");
-  //   }
-  // }
-  //
-  // /// ✅ 새로운 퀘스트 생성 (POST 요청)
-  // Future<void> _createQuest(String todo) async {
-  //   final url = Uri.parse('https://localhost:8080/quest/self-gen/${widget.userId}');
-  //   final response = await http.post(
-  //     url,
-  //     headers: {"Content-Type": "application/json"},
-  //     body: json.encode({"todo": todo}),
-  //   );
-  //
-  //   if (response.statusCode == 200) {
-  //     _fetchQuests(); // ✅ 퀘스트 다시 불러오기
-  //   } else {
-  //     print("Error creating quest: ${response.body}");
-  //   }
-  // }
-  //
-  // /// ✅ 퀘스트 완료 처리 (POST 요청)
-  // Future<void> _completeQuest(int questId) async {
-  //   final url = Uri.parse('https://localhost:8080/quest/self-clear/$questId');
-  //   final response = await http.post(url);
-  //
-  //   if (response.statusCode == 200) {
-  //     _fetchQuests(); // ✅ 완료 후 퀘스트 목록 갱신
-  //   } else {
-  //     print("Error completing quest: ${response.body}");
-  //   }
-  // }
-  //
-  // /// ✅ 퀘스트 삭제 (DELETE 요청)
-  // Future<void> _deleteQuest(int questId) async {
-  //   final url = Uri.parse('https://localhost:8080/quest/remove/$questId');
-  //   final response = await http.delete(url);
-  //
-  //   if (response.statusCode == 200) {
-  //     _fetchQuests(); // ✅ 삭제 후 퀘스트 목록 갱신
-  //   } else {
-  //     print("Error deleting quest: ${response.body}");
-  //   }
-  // }
+  /// 퀘스트 생성 다이얼로그 호출
+  void _showQuestCreationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => QuestCreationDialog(
+        onQuestCreated: _addQuest, // ✅ 생성된 퀘스트를 리스트에 추가하는 콜백 함수 전달
+      ),
+    );
+  }
+
+  /// ✅ [GET] 사용자 퀘스트 가져오기
+  Future<void> _fetchQuests() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$apiBaseUrl/list/$userId'), // 🔹 {user_id}를 실제 유저 ID로 변경해야 함
+        headers: {'Authorization': 'Bearer $authToken'},
+      );
+      print("userId: $userId");
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        setState(() {
+          _quests = data.map((json) => QuestItemModel.fromJson(json)).toList();
+        });
+      } else {
+        print("퀘스트 불러오기 실패: ${response.statusCode}, 응답: ${response.body}");
+      }
+    } catch (error) {
+      print("퀘스트 불러오는 중 오류 발생: $error");
+    }
+  }
+
+  /// ✅ [POST] 퀘스트 생성
+  Future<void> _addQuest(QuestItemModel quest) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$apiBaseUrl/self-gen/$userId'),
+        headers: {
+          'Authorization': 'Bearer $authToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "title": quest.title,
+          "description": quest.description,
+          "tag": quest.tag,
+
+        }),
+      );
+      print("userId: $userId");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final newQuest = QuestItemModel.fromJson(data['quest']);
+        setState(() {
+          _quests.insert(0, newQuest);
+        });
+      } else {
+        print("퀘스트 생성 실패: ${response.statusCode}, 응답: ${response.body}");
+      }
+    } catch (error) {
+      print("퀘스트 생성 중 오류 발생: $error");
+    }
+  }
+
+  /// ✅ [PUT] 퀘스트 완료 처리
+  Future<void> _completeQuest(QuestItemModel quest) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$apiBaseUrl/self-clear/${quest.id}'),
+        headers: {'Authorization': 'Bearer $authToken'},
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _quests.removeWhere((q) => q.id == quest.id);
+        });
+      } else {
+        print("퀘스트 완료 처리 실패: ${response.statusCode}, 응답: ${response.body}");
+      }
+    } catch (error) {
+      print("퀘스트 완료 처리 중 오류 발생: $error");
+    }
+  }
+
+  /// ✅ [DELETE] 퀘스트 삭제
+  Future<void> _deleteQuest(QuestItemModel quest) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$apiBaseUrl/remove/${quest.id}'),
+        headers: {'Authorization': 'Bearer $authToken'},
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _quests.removeWhere((q) => q.id == quest.id);
+        });
+      } else {
+        print("퀘스트 삭제 실패: ${response.statusCode}, 응답: ${response.body}");
+      }
+    } catch (error) {
+      print("퀘스트 삭제 중 오류 발생: $error");
+    }
+  }
 
   // 난이도
   String getDifficulty(int selectedHours) {
@@ -110,236 +162,6 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
     }
   }
 
-  // 퀘스트 생성 다이얼로그
-  void _showQuestCreationDialog() {
-    final TextEditingController titleController = TextEditingController();
-    final TextEditingController contentController = TextEditingController();
-    String? selectedTag = tags.first;
-    int selectedHours = 1;
-    int selectedMinutes = 0;
-
-    showDialog(
-      context: context, builder: (context) => StatefulBuilder(  // StatefulBuilder 추가
-      builder: (context, setDialogState) => Dialog(
-        insetPadding: const EdgeInsets.all(16),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '퀘스트 생성',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // 제목 입력
-                Text(
-                  "제목",
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(
-                    hintText: '퀘스트 제목을 입력하세요.',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // 내용 입력
-                Text(
-                  "내용",
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: contentController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    hintText: '퀘스트 내용을 입력하세요',
-                    border: OutlineInputBorder(),
-                    alignLabelWithHint: true,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // 목표 시간 설정
-                Text(
-                  '목표 시간',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<int>(
-                        value: selectedHours,
-                        decoration: const InputDecoration(
-                          labelText: '시간',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: List.generate(6, (i) => i + 1)
-                            .map((h) => DropdownMenuItem(
-                                  value: h,
-                                  child: Text('$h시간'),
-                                ))
-                            .toList(),
-                        onChanged: (value) => selectedHours = value!,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: DropdownButtonFormField<int>(
-                        value: selectedMinutes,
-                        decoration: const InputDecoration(
-                          labelText: '분',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: [0, 15, 30, 45]
-                            .map((m) => DropdownMenuItem(
-                                  value: m,
-                                  child: Text('$m분'),
-                                ))
-                            .toList(),
-                        onChanged: (value) => selectedMinutes = value!,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // 태그 선택
-                Text(
-                  '태그',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: selectedTag,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
-                  items: tags
-                      .map((tag) => DropdownMenuItem(
-                            value: tag,
-                            child: Text(tag),
-                          ))
-                      .toList(),
-                  onChanged: (value) => selectedTag = value,
-                ),
-                const SizedBox(height: 24),
-
-                // 요일 선택
-                Text(
-                  '반복 요일',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  // key: ValueKey(_selectedDays.hashCode), // 강제 리빌드 -> 색상 초기화
-                  spacing: 8,
-                  children: _days.map((day) {
-                    return GestureDetector(
-                      onTap: () {
-                        setDialogState(() {
-                          _selectedDays[day] = !_selectedDays[day]!; // ✅ 클릭 시 즉시 상태 변경
-                          // 디버깅 코드
-                          print("선택된 요일: $_selectedDays");
-                        });
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: _selectedDays[day]! ? Theme.of(context).colorScheme.primary : Colors.grey[300], // ✅ 선택 시 색상 변경
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          day,
-                          style: TextStyle(
-                            color: _selectedDays[day]! ? Colors.white : Colors.black, // ✅ 선택 여부에 따라 텍스트 색 변경
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 32),
-
-                // 버튼
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('취소'),
-                    ),
-                    FilledButton.icon(
-                      onPressed: () async {
-                        await _generateAIQuest(
-                          titleController,
-                          contentController,
-                              (tag) {
-                            setState(() {
-                              selectedTag = tag;
-                            });
-                          },
-                              (h) {
-                            setState(() {
-                              selectedHours = h;
-                            });
-                          },
-                              (m) {
-                            setState(() {
-                              selectedMinutes = m;
-                            });
-                          },
-                        );
-                      },
-                      icon: const Icon(Icons.auto_awesome),
-                      label: const Text('AI 추천'),
-                    ),
-                    FilledButton(
-                      onPressed: () {
-                        if (titleController.text.isEmpty) return;
-
-                        final newQuest = QuestItemModel(
-                          id: DateTime.now().millisecondsSinceEpoch.toString(),
-                          title: titleController.text,
-                          description: contentController.text,
-                          difficulty: getDifficulty(selectedHours),
-                          deadline: null,
-                          createdAt: DateTime.now(),
-                          totalTime: Duration(hours: selectedHours, minutes: selectedMinutes, seconds: 0),
-                        );
-
-                        _selectedDays = {
-                          '월': false, '화': false, '수': false,
-                          '목': false, '금': false, '토': false, '일': false,
-                        };
-
-                        setState(() {
-                          _addQuest(newQuest);
-                          // 요일 리셋
-                        });
-
-                        Navigator.pop(context);
-                      },
-                      child: const Text('생성'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ),
-    );
-  }
 
   // AI 퀘스트 생성 로직
   Future<void> _generateAIQuest(
@@ -454,31 +276,8 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
     );
   }
 
-  void _addQuest(QuestItemModel quest) {
-    setState(() {
-      _quests.insert(0, quest);
-    });
-  }
-
   void _editQuest(QuestItemModel quest) {
     // TODO: 퀘스트 수정 구현
-  }
-
-  void _completeQuest(QuestItemModel quest) {
-    // ui
-    setState(() {
-      final index = _quests.indexWhere((q) => q.id == quest.id);
-      if (index != -1) {
-        _quests.removeAt(index);
-      }
-    });
-  }
-
-  void _deleteQuest(QuestItemModel quest) {
-    // ui
-    setState(() {
-      _quests.removeWhere((q) => q.id == quest.id);
-    });
   }
 }
 
