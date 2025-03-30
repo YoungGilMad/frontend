@@ -149,7 +149,9 @@ class _GroupScreenState extends State<GroupScreen> {
             ),
             TextButton(
               onPressed: () {
-                // 검색 기능 추가 가능
+                // 검색 기능 구현
+                debugPrint('Searching for group: $searchQuery');
+                // TODO: Implement actual search functionality using searchQuery
                 Navigator.pop(context);
               },
               child: const Text('검색'),

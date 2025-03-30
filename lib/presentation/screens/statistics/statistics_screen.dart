@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../data/models/statistics_model.dart';
 import '../../providers/statistics_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -523,56 +522,5 @@ class _StatisticsScreenState extends State<StatisticsScreen> with SingleTickerPr
         ],
       ),
     );
-  }
-
-  List<PieChartSectionData> _getMockPieData() {
-    return [
-      PieChartSectionData(
-        value: 30,
-        color: Colors.blue,
-        title: '30%',
-        radius: 50,
-      ),
-      PieChartSectionData(
-        value: 25,
-        color: Colors.green,
-        title: '25%',
-        radius: 50,
-      ),
-      PieChartSectionData(
-        value: 20,
-        color: Colors.orange,
-        title: '20%',
-        radius: 50,
-      ),
-      PieChartSectionData(
-        value: 15,
-        color: Colors.purple,
-        title: '15%',
-        radius: 50,
-      ),
-      PieChartSectionData(
-        value: 10,
-        color: Colors.red,
-        title: '10%',
-        radius: 50,
-      ),
-    ];
-  }
-
-  List<BarChartGroupData> _getMockBarData() {
-    return List.generate(7, (index) {
-      return BarChartGroupData(
-        x: index,
-        barRods: [
-          BarChartRodData(
-            toY: (index + 1) * 10.0,
-            color: Theme.of(context).colorScheme.primary,
-            width: 20,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ],
-      );
-    });
   }
 }
