@@ -63,7 +63,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.vertical(
           bottom: Radius.circular(16),
         ),

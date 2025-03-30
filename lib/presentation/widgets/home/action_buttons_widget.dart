@@ -107,7 +107,7 @@ class ActionButtonsWidget extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Material(
-      color: Theme.of(context).colorScheme.surfaceVariant,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
