@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part "quest_item_model.g.dart";
+part 'quest_item_model.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class QuestItemModel {
@@ -10,122 +10,76 @@ class QuestItemModel {
   final String title;
   final String description;
 
-  @JsonKey(name: 'deadline', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-  final DateTime? deadline;
+  final String? tag;
+  final int? days;
 
-  @JsonKey(name: 'is_completed', defaultValue: false)
-  final bool isCompleted;
-
-  final String difficulty;
-
-  @JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
-  final DateTime createdAt;
-
-  @JsonKey(name: 'is_hero', defaultValue: false)
-  final bool isHero;
-
-  @JsonKey(
-    name: 'progress_time',
-    fromJson: _durationFromSeconds,
-    toJson: _durationToSeconds,
-    defaultValue: Duration.zero,
-    includeIfNull: false,
-  )
+  @JsonKey(name: 'progress_time', fromJson: _durationFromSeconds, toJson: _durationToSeconds)
   final Duration progressTime;
 
-  @JsonKey(
-    name: 'total_time',
-    fromJson: _durationFromSeconds,
-    toJson: _durationToSeconds,
-    defaultValue: Duration.zero,
-    includeIfNull: false,
-  )
+  @JsonKey(name: 'complete_time', fromJson: _nullableDateTimeFromJson, toJson: _nullableDateTimeToJson)
+  final DateTime? completeTime;
+
+  @JsonKey(name: 'finish')
+  final bool isCompleted;
+
+  @JsonKey(name: 'quest_type')
+  final String questType;
+
+  @JsonKey(name: 'start_time', fromJson: _nullableDateTimeFromJson, toJson: _nullableDateTimeToJson)
+  final DateTime? startTime;
+
+  @JsonKey(name: 'stop_time', fromJson: _nullableDateTimeFromJson, toJson: _nullableDateTimeToJson)
+  final DateTime? stopTime;
+
+  @JsonKey(name: 'finish_time', fromJson: _nullableDateTimeFromJson, toJson: _nullableDateTimeToJson)
+  final DateTime? finishTime;
+
+  @JsonKey(name: 'deadline', fromJson: _nullableDateTimeFromJson, toJson: _nullableDateTimeToJson)
+  final DateTime? deadline;
+
+  // 👇 프론트 전용 필드
+  @JsonKey(ignore: true)
+  final String difficulty;
+
+  @JsonKey(ignore: true)
   final Duration totalTime;
 
   const QuestItemModel({
     required this.id,
     required this.title,
     required this.description,
-    this.deadline,
-    this.isCompleted = false,
-    required this.difficulty,
-    required this.createdAt,
-    this.isHero = false,
+    this.tag,
+    this.days,
     this.progressTime = Duration.zero,
-    this.totalTime = Duration.zero,
+    this.completeTime,
+    this.isCompleted = false,
+    required this.questType,
+    this.startTime,
+    this.stopTime,
+    this.finishTime,
+    this.deadline,
+    // 프론트 전용 초기값
+    this.difficulty = 'normal',
+    this.totalTime = const Duration(),
   });
 
-  /// JSON → 객체 변환
   factory QuestItemModel.fromJson(Map<String, dynamic> json) =>
       _$QuestItemModelFromJson(json);
 
-  /// 객체 → JSON 변환
   Map<String, dynamic> toJson() => _$QuestItemModelToJson(this);
 
-  /// 객체 복사 메서드
-  QuestItemModel copyWith({
-    String? id,
-    String? title,
-    String? description,
-    DateTime? deadline,
-    bool? isCompleted,
-    String? difficulty,
-    DateTime? createdAt,
-    bool? isHero,
-    Duration? progressTime,
-    Duration? totalTime,
-  }) {
-    return QuestItemModel(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      deadline: deadline ?? this.deadline,
-      isCompleted: isCompleted ?? this.isCompleted,
-      difficulty: difficulty ?? this.difficulty,
-      createdAt: createdAt ?? this.createdAt,
-      isHero: isHero ?? this.isHero,
-      progressTime: progressTime ?? this.progressTime,
-      totalTime: totalTime ?? this.totalTime,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is QuestItemModel &&
-              runtimeType == other.runtimeType &&
-              id == other.id &&
-              title == other.title &&
-              description == other.description &&
-              deadline == other.deadline &&
-              isCompleted == other.isCompleted &&
-              difficulty == other.difficulty &&
-              createdAt == other.createdAt &&
-              isHero == other.isHero &&
-              progressTime == other.progressTime &&
-              totalTime == other.totalTime;
-
-  @override
-  int get hashCode =>
-      id.hashCode ^
-      title.hashCode ^
-      description.hashCode ^
-      deadline.hashCode ^
-      isCompleted.hashCode ^
-      difficulty.hashCode ^
-      createdAt.hashCode ^
-      isHero.hashCode ^
-      progressTime.hashCode ^
-      totalTime.hashCode;
-
-  /// ✅ Duration ↔ int 변환 헬퍼
   static Duration _durationFromSeconds(int seconds) => Duration(seconds: seconds);
   static int _durationToSeconds(Duration duration) => duration.inSeconds;
 
-  /// ✅ DateTime ↔ String 변환 헬퍼
-  static DateTime _dateTimeFromJson(String date) => DateTime.parse(date);
-  static String _dateTimeToJson(DateTime date) => date.toUtc().toIso8601String();
-
-  /// int값 id를 string으로 전환
   static String _fromDynamicToString(dynamic value) => value.toString();
+
+  static DateTime? _nullableDateTimeFromJson(dynamic value) =>
+      value == null ? null : DateTime.parse(value);
+  static String? _nullableDateTimeToJson(DateTime? date) =>
+      date?.toUtc().toIso8601String();
 }
+
+/**
+ * 만약 difficulty, totalTime 같은 필드는 프론트에서만 사용 -> 데이터 직렬화(JSON) X
+ * finish가 isCompleted로 맵핑됨 (0 or 1이므로 FastAPI에서 bool로 바꾸는 로직 필요할 수도 있음).
+ */

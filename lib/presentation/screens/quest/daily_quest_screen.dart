@@ -87,7 +87,10 @@ class _DailyQuestScreenState extends State<DailyQuestScreen> {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          "todo": quest.description,
+          "title": quest.title,
+          "description": quest.description,
+          "tag": quest.tag,
+
         }),
       );
       print("userId: $userId");
