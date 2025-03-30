@@ -244,6 +244,7 @@ class _FriendListWidgetState extends State<FriendListWidget> {
               intelligence: friend.intelligence,
               stamina: friend.stamina,
               profileImage: friend.profileImage,
+              friend: friend,
             ),
           ),
         );
