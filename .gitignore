@@ -45,3 +45,50 @@ app.*.map.json
 /android/app/release
 
 *.env
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.*
+**/android/app/.cxx/
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+
+# iOS 관련 파일
+## Podfile, Xcode 프로젝트 설정 등
+ios/Pods/
+ios/*.lock
+ios/*.mode1v3
+ios/*.mode2v3
+ios/*.moved-aside
+ios/*.pbxuser
+ios/*.perspectivev3
+ios/.sconsign.dblite
+ios/.tags*
+ios/.vagrant/
+ios/DerivedData/
+ios/Icon?
+ios/Pods/
+ios/profile
+ios/xcuserdata
+ios/.symlinks/
+ios/Flutter/Flutter.podspec
+ios/Flutter/flutter_export_environment.sh
+
+## Xcode 프로젝트 파일 
+**/ios/**/*.pbxproj
+**/ios/**/*.xcworkspace
+**/ios/**/*.xcodeproj
+**/ios/.generated/
+
+## Xcode 스키마
+**/ios/**/*.xcscheme

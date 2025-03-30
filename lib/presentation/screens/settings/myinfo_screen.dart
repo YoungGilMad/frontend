@@ -26,12 +26,12 @@ class MyInfoScreen extends StatelessWidget {
               onPressed: () {
                 // Handle profile update
               },
-              child: const Text('프로필 업데이트'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 48),
               ),
+              child: const Text('프로필 업데이트'),
             ),
           ],
         ),

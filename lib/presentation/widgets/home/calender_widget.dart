@@ -67,7 +67,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
     final firstDay = DateTime(now.year, 1, 1);
     final lastDay = DateTime(now.year, 12, 31);
 
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height,
       child: Column(
         children: [

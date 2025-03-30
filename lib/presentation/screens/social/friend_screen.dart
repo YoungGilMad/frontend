@@ -152,9 +152,9 @@ class _FriendScreenState extends State<FriendScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: _showSearchDialog,
         backgroundColor: Colors.blue, // 버튼 색상을 파란색으로 설정
-        shape: const CircleBorder(), // 버튼을 완전히 동그랗게 만듦
-        child: const Icon(Icons.search, color: Colors.white), // 아이콘 색상을 흰색으로 설정
-        tooltip: '친구 검색',
+        shape: const CircleBorder(), // 아이콘 색상을 흰색으로 설정
+        tooltip: '친구 검색', // 버튼을 완전히 동그랗게 만듦
+        child: const Icon(Icons.search, color: Colors.white),
       ),
     );
   }
