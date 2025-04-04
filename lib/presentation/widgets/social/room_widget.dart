@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'group_widget.dart';
+import '../../../data/models/group_item.dart';
 
 class RoomWidget extends StatelessWidget {
   final GroupItem group;

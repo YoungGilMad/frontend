@@ -1,26 +1,109 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import '../../../data/models/group_item.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
 import 'join_group_widget.dart';
 import 'room_widget.dart';
 
 class GroupWidget extends StatelessWidget {
   final List<GroupItem> groups;
-  final Function(GroupItem group)? onGroupTap;
-  final Function(GroupItem group)? onLeaveGroup;
-  final Function(String userId, GroupItem group)? onInviteMember;
-  final Function(String name, String? description)? onCreateGroup;
 
   const GroupWidget({
     super.key,
     required this.groups,
-    this.onGroupTap,
-    this.onLeaveGroup,
-    this.onInviteMember,
-    this.onCreateGroup,
   });
 
-  @override
+  // ✅ 그룹 생성 API 호출
+  Future<void> _createGroup({
+    required BuildContext context,
+    required int userId,
+    required String name,
+    String? description,
+  }) async {
+    final uri = Uri.parse("http://YOUR_BACKEND_URL/social/group/make/$userId")
+        .replace(queryParameters: {
+      'name': name,
+      'description': description ?? '',
+    });
+
+    try {
+      final response = await http.post(uri);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("그룹이 생성되었습니다.")),
+        );
+        print("✅ 생성된 그룹 ID: ${data['group_id']}");
+        // TODO: 그룹 목록 갱신
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("그룹 생성 실패: ${response.body}")),
+        );
+      }
+    } catch (e) {
+      print("네트워크 오류: $e");
+    }
+  }
+
+  // ✅ 그룹 생성 다이얼로그
+  Future<void> _showCreateGroupDialog(BuildContext context, int userId) async {
+    final nameController = TextEditingController();
+    final descriptionController = TextEditingController();
+
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('새 스터디 그룹 만들기'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: '그룹 이름',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: '그룹 설명',
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (nameController.text.isNotEmpty) {
+                _createGroup(
+                  context: context,
+                  userId: userId,
+                  name: nameController.text,
+                  description: descriptionController.text,
+                );
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('만들기'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final userId = authProvider.user?.id;
+
     return Column(
       children: [
         // 그룹 생성 및 참여 버튼
@@ -31,7 +114,9 @@ class GroupWidget extends StatelessWidget {
               Expanded(
                 child: FilledButton.icon(
                   onPressed: () {
-                    _showCreateGroupDialog(context);
+                    if (userId != null) {
+                      _showCreateGroupDialog(context, userId);
+                    }
                   },
                   icon: const Icon(Icons.add),
                   label: const Text('새 스터디 그룹 만들기'),
@@ -60,16 +145,13 @@ class GroupWidget extends StatelessWidget {
         // 그룹 목록
         Expanded(
           child: groups.isEmpty
-              ? _buildEmptyState(context)
+              ? _buildEmptyState(context, userId)
               : ListView.builder(
             itemCount: groups.length,
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             itemBuilder: (context, index) {
               final group = groups[index];
-              return _GroupCard(
-                group: group,
-                onGroupTap: onGroupTap,
-              );
+              return _GroupCard(group: group);
             },
           ),
         ),
@@ -77,69 +159,12 @@ class GroupWidget extends StatelessWidget {
     );
   }
 
-  // 그룹 생성 다이얼로그
-  Future<void> _showCreateGroupDialog(BuildContext context) async {
-    final nameController = TextEditingController();
-    final descriptionController = TextEditingController();
-
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('새 스터디 그룹 만들기'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: '그룹 이름',
-                hintText: '그룹 이름을 입력하세요',
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: descriptionController,
-              decoration: const InputDecoration(
-                labelText: '그룹 설명',
-                hintText: '그룹 설명을 입력하세요',
-              ),
-              maxLines: 3,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (nameController.text.isNotEmpty) {
-                onCreateGroup?.call(
-                  nameController.text,
-                  descriptionController.text.isEmpty
-                      ? null
-                      : descriptionController.text,
-                );
-              }
-            },
-            child: const Text('만들기'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, int? userId) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.group_outlined,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.group_outlined, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             '아직 참여 중인 그룹이 없습니다',
@@ -160,7 +185,9 @@ class GroupWidget extends StatelessWidget {
             children: [
               FilledButton.icon(
                 onPressed: () {
-                  _showCreateGroupDialog(context);
+                  if (userId != null) {
+                    _showCreateGroupDialog(context, userId);
+                  }
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('그룹 만들기'),
@@ -188,11 +215,9 @@ class GroupWidget extends StatelessWidget {
 
 class _GroupCard extends StatefulWidget {
   final GroupItem group;
-  final Function(GroupItem group)? onGroupTap;
 
   const _GroupCard({
     required this.group,
-    this.onGroupTap,
   });
 
   @override
@@ -251,88 +276,33 @@ class _GroupCardState extends State<_GroupCard> {
                   ),
                 ],
               ),
-
-              // 활동중인 멤버와 버튼 (확장 시에만 표시)
               if (_isExpanded) ...[
                 const SizedBox(height: 16),
                 Text(
-                  '현재 활동중',
+                  '현재 활동중', // 실제 구현은 아래 참고
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 8),
-                SizedBox(
-                  height: 40,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: widget.group.activeMembers.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: CircleAvatar(
-                          backgroundImage: NetworkImage(widget.group.activeMembers[index].photoUrl),
-                          radius: 20,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RoomWidget(group: widget.group),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.login),
-                    label: const Text('방 들어가기'),
-                  ),
-                ),
+                const Text('(활동중인 멤버 기능은 백엔드 구현 필요)'),
               ],
+              const SizedBox(height: 12),
+              if (_isExpanded)
+                FilledButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RoomWidget(group: widget.group),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.login),
+                  label: const Text('방 들어가기'),
+                ),
             ],
           ),
         ),
       ),
     );
   }
-}
-
-class GroupItem {
-  final String id;
-  final String name;
-  final String? description;
-  final int memberCount;
-  final bool isOwner;
-  final int completedQuests;
-  final int weeklyGrowth;
-  final int ranking;
-  final List<ActiveMember> activeMembers;
-
-  const GroupItem({
-    required this.id,
-    required this.name,
-    this.description,
-    required this.memberCount,
-    this.isOwner = false,
-    this.completedQuests = 0,
-    this.weeklyGrowth = 0,
-    this.ranking = 0,
-    this.activeMembers = const [],
-  });
-}
-
-class ActiveMember {
-  final String id;
-  final String name;
-  final String photoUrl;
-
-  const ActiveMember({
-    required this.id,
-    required this.name,
-    required this.photoUrl,
-  });
 }
