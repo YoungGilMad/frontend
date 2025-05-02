@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
+import '../../widgets/quest/quest_clear_dialog_widget.dart';
 import '/data/models/quest_item_model.dart';
 import 'package:app_beh/presentation/providers/auth_provider.dart';
 
@@ -15,23 +16,29 @@ class QuestDetailScreen extends StatefulWidget {
 class _QuestDetailScreenState extends State<QuestDetailScreen> {
   late Timer _timer;
   late int _elapsedSeconds; // 진행 시간 (초)
-  late int _totalSeconds;   // 완료 시간 (초)
+  late int _completeSeconds;   // 완료 시간 (초)
   bool _isRunning = true;
 
   @override
   void initState() {
     super.initState();
     _elapsedSeconds = widget.quest.progressTime.inSeconds; // ✅ quest에서 진행시간 가져오기
-    _totalSeconds = widget.quest.totalTime.inSeconds > 0 ? widget.quest.totalTime.inSeconds : 1; // ✅ 완료시간 가져오기
+    _completeSeconds = widget.quest.completeTime.inSeconds > 0 ? widget.quest.completeTime.inSeconds : 1; // ✅ 완료시간 가져오기
     _startTimer();
+  }
+
+  void _onQuestComplete() {
+    // 팝업 or 애니메이션 or 서버 전송 등
+    showCelebrationDialog(context); // 예: 빵빠레 팝업
   }
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_elapsedSeconds < _totalSeconds) {
+      if (_elapsedSeconds < _completeSeconds) {
         setState(() => _elapsedSeconds++);
       } else {
         _timer.cancel(); // 완료 시 타이머 중지
+        _onQuestComplete();
       }
     });
   }
@@ -47,7 +54,7 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
     });
   }
 
-  double _getProgress() => (_elapsedSeconds / _totalSeconds).clamp(0.0, 1.0);
+  double _getProgress() => (_elapsedSeconds / _completeSeconds).clamp(0.0, 1.0);
 
   @override
   void dispose() {
@@ -60,6 +67,13 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
     final minutes = ((seconds % 3600) ~/ 60).toString().padLeft(2, '0');
     final secs = (seconds % 60).toString().padLeft(2, '0');
     return "$hours:$minutes:$secs";
+  }
+
+  String formatDuration(Duration duration) {
+    final h = duration.inHours.toString().padLeft(2, '0');
+    final m = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$h:$m:$s';
   }
 
   @override
@@ -84,7 +98,7 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
 
             // ✅ 진행 시간 / 완료 시간 표시
             Text(
-              "${formatTime(_elapsedSeconds)} / ${formatTime(_totalSeconds)}",
+              "${formatDuration(Duration(seconds: _elapsedSeconds))} / ${formatDuration(widget.quest.completeTime)}",
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),

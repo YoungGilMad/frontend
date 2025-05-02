@@ -23,6 +23,7 @@ dependencies:
   intl: ^0.18.0 # 캘린더 관련 언어 설정 라이브러리
   flutter_svg: ^2.0.9
   image_picker: ^1.1.2
+  lottie: ^2.6.0
   
 dev_dependencies:
   flutter_test:
@@ -38,3 +39,4 @@ flutter:
     - .env  # .env 파일을 assets에 추가
     - assets/images/    # 이미지 파일들이 있는 폴더
     - assets/icons/     # 아이콘 파일들이 있는 폴더
+    - assets/animations/ # 애니메이션 파일들이 있는 폴더

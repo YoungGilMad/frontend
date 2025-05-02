@@ -52,7 +52,8 @@ class _QuestCreationDialogState extends State<QuestCreationDialog> {
       title: titleController.text,
       description: contentController.text,
       difficulty: getDifficulty(selectedHours),
-      totalTime: Duration(hours: selectedHours, minutes: selectedMinutes),
+      progressTime: Duration.zero,
+      completeTime: Duration(hours: selectedHours, minutes: selectedMinutes),
       questType: 'self',
     );
 
