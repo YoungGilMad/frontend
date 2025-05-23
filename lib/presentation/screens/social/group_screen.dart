@@ -198,7 +198,7 @@ class _GroupScreenState extends State<GroupScreen> {
             backgroundColor: Colors.blue,
             shape: const CircleBorder(),
             tooltip: '새 그룹 만들기',
-            child: const Icon(Icons.add, color: Colors.white),
+            child: const Icon(Icons.groups, color: Colors.white),
           ),
           const SizedBox(height: 12),
           FloatingActionButton(

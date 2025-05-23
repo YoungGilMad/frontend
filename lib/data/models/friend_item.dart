@@ -2,17 +2,12 @@ class FriendItem {
   final String id;
   final String name;
   final int level;
-  final String lastActive;
-  final bool isOnline;
-  final bool isPremium;
   final String? profileImage;
   bool hasStory;
 
-  // ✅ 기본값 추가 (랭킹, 경험치)
   final int ranking;
   final int xp;
 
-  // ✅ 기본값 추가 (스탯 정보)
   final int strength;
   final int agility;
   final int intelligence;
@@ -22,16 +17,30 @@ class FriendItem {
     required this.id,
     required this.name,
     required this.level,
-    required this.lastActive,
-    required this.isOnline,
-    required this.isPremium,
     required this.profileImage,
     this.hasStory = false,
-    required this.ranking,  // ✅ null 방지
-    required this.xp,       // ✅ null 방지
-    required this.strength,  // ✅ null 방지
-    required this.agility,   // ✅ null 방지
-    required this.intelligence, // ✅ null 방지
-    required this.stamina,   // ✅ null 방지
+    required this.ranking,
+    required this.xp,
+    required this.strength,
+    required this.agility,
+    required this.intelligence,
+    required this.stamina,
   });
+
+  // ✅ fromJson 팩토리 메서드 추가
+  factory FriendItem.fromJson(Map<String, dynamic> json) {
+    return FriendItem(
+      id: json['id'].toString(),
+      name: json['name'],
+      level: json['level'] ?? 0,
+      profileImage: json['profile_img'],
+      hasStory: false,
+      ranking: json['ranking'] ?? 0,
+      xp: json['xp'] ?? 0,
+      strength: json['strength'] ?? 0,
+      agility: json['agility'] ?? 0,
+      intelligence: json['intelligence'] ?? 0,
+      stamina: json['stamina'] ?? 0,
+    );
+  }
 }

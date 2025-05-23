@@ -23,6 +23,7 @@ dependencies:
   intl: ^0.18.0 # 캘린더 관련 언어 설정 라이브러리
   flutter_svg: ^2.0.9
   image_picker: ^1.1.2
+  dio: ^5.4.0  # 버전은 최신으로
   
 dev_dependencies:
   flutter_test:
