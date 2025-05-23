@@ -10,6 +10,7 @@ import 'presentation/screens/onboarding/onboarding_screen.dart';
 import 'core/theme/app_theme.dart';  // AppTheme import 추가
 import 'data/repositories/statistics_repository.dart';
 import 'presentation/providers/statistics_provider.dart';
+import 'presentation/providers/quest_timer_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +23,7 @@ void main() async {
   runApp(
   MultiProvider(
     providers: [
+      ChangeNotifierProvider(create: (_) => QuestTimerProvider()),
       ChangeNotifierProvider(
         create: (_) => AuthProvider(
           authRepository: authRepository,
