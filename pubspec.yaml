@@ -24,7 +24,10 @@ dependencies:
   flutter_svg: ^2.0.9
   image_picker: ^1.1.2
   dio: ^5.4.0  # 버전은 최신으로
-  
+  lottie: ^2.6.0
+  flutter_local_notifications: ^19.2.1
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -39,3 +42,4 @@ flutter:
     - .env  # .env 파일을 assets에 추가
     - assets/images/    # 이미지 파일들이 있는 폴더
     - assets/icons/     # 아이콘 파일들이 있는 폴더
+    - assets/animations/ # 애니메이션 파일들이 있는 폴더

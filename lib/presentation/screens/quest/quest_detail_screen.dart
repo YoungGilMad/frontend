@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
+import '../../widgets/quest/quest_clear_dialog_widget.dart';
 import '/data/models/quest_item_model.dart';
 import 'package:app_beh/presentation/providers/auth_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QuestDetailScreen extends StatefulWidget {
   final QuestItemModel quest;
@@ -12,26 +14,88 @@ class QuestDetailScreen extends StatefulWidget {
   _QuestDetailScreenState createState() => _QuestDetailScreenState();
 }
 
-class _QuestDetailScreenState extends State<QuestDetailScreen> {
+class _QuestDetailScreenState extends State<QuestDetailScreen> with WidgetsBindingObserver {
   late Timer _timer;
   late int _elapsedSeconds; // 진행 시간 (초)
-  late int _totalSeconds;   // 완료 시간 (초)
+  late int _completeSeconds;   // 완료 시간 (초)
   bool _isRunning = true;
+  bool _isInitialized = false;
+
+  String get _elapsedKey => 'quest_${widget.quest.id}_elapsed';
+  String get _pausedAtKey => 'quest_${widget.quest.id}_paused_at';
 
   @override
   void initState() {
     super.initState();
-    _elapsedSeconds = widget.quest.progressTime.inSeconds; // ✅ quest에서 진행시간 가져오기
-    _totalSeconds = widget.quest.totalTime.inSeconds > 0 ? widget.quest.totalTime.inSeconds : 1; // ✅ 완료시간 가져오기
-    _startTimer();
+    WidgetsBinding.instance.addObserver(this); // 앱 생명주기 감지
+    _loadTimerState().then((_) {
+      setState(() => _isInitialized = true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  // 앱이 백그라운드로 가거나 돌아올 때 처리
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _persistTimerState();
+    }
+  }
+
+  // 창을 나갔다가 올 때 시간을 추가하기 위한 누적 시간 저장
+  Future<void> _persistTimerState() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('quest_${widget.quest.id}_elapsed', _elapsedSeconds);
+    prefs.setInt('quest_${widget.quest.id}_paused_at', DateTime.now().millisecondsSinceEpoch);
+  }
+
+  // init시 타이머 상태를 불러오기
+  Future<void> _loadTimerState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedElapsed = prefs.getInt(_elapsedKey) ?? widget.quest.progressTime.inSeconds;
+    final pausedAt = prefs.getInt(_pausedAtKey);
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    if (pausedAt != null) {
+      final diff = ((now - pausedAt) / 1000).floor();
+      _elapsedSeconds = savedElapsed + diff;
+    } else {
+      _elapsedSeconds = savedElapsed;
+    }
+
+    _completeSeconds = widget.quest.completeTime.inSeconds > 0
+        ? widget.quest.completeTime.inSeconds
+        : 1;
+
+    if (mounted) {
+      _startTimer();
+    }
+  }
+
+  Future<void> _clearSavedTimerState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_elapsedKey);
+    await prefs.remove(_pausedAtKey);
+  }
+
+  void _onQuestComplete() {
+    // 팝업 or 애니메이션 or 서버 전송 등
+    showCelebrationDialog(context); // 예: 빵빠레 팝업
   }
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_elapsedSeconds < _totalSeconds) {
+      if (_elapsedSeconds < _completeSeconds) {
         setState(() => _elapsedSeconds++);
       } else {
-        _timer.cancel(); // 완료 시 타이머 중지
+        _timer.cancel();
+        _clearSavedTimerState();
+        _onQuestComplete();
       }
     });
   }
@@ -40,6 +104,7 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
     setState(() {
       if (_isRunning) {
         _timer.cancel();
+        _persistTimerState();
       } else {
         _startTimer();
       }
@@ -47,13 +112,7 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
     });
   }
 
-  double _getProgress() => (_elapsedSeconds / _totalSeconds).clamp(0.0, 1.0);
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
+  double _getProgress() => (_elapsedSeconds / _completeSeconds).clamp(0.0, 1.0);
 
   String formatTime(int seconds) {
     final hours = (seconds ~/ 3600).toString().padLeft(2, '0');
@@ -62,8 +121,21 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
     return "$hours:$minutes:$secs";
   }
 
+  String formatDuration(Duration duration) {
+    final h = duration.inHours.toString().padLeft(2, '0');
+    final m = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$h:$m:$s';
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text(widget.quest.questType == 'hero'? "영웅 퀘스트" : "자기주도 퀘스트")),
       body: Padding(
@@ -84,7 +156,7 @@ class _QuestDetailScreenState extends State<QuestDetailScreen> {
 
             // ✅ 진행 시간 / 완료 시간 표시
             Text(
-              "${formatTime(_elapsedSeconds)} / ${formatTime(_totalSeconds)}",
+              "${formatDuration(Duration(seconds: _elapsedSeconds))} / ${formatDuration(widget.quest.completeTime)}",
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),

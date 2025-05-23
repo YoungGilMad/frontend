@@ -17,13 +17,16 @@ QuestItemModel _$QuestItemModelFromJson(Map<String, dynamic> json) =>
           ? Duration.zero
           : QuestItemModel._durationFromSeconds(
               (json['progress_time'] as num).toInt()),
-      completeTime:
-          QuestItemModel._nullableDateTimeFromJson(json['complete_time']),
+      completeTime: json['complete_time'] == null
+          ? Duration.zero
+          : QuestItemModel._durationFromSeconds(
+              (json['complete_time'] as num).toInt()),
       isCompleted: json['finish'] as bool? ?? false,
       questType: json['quest_type'] as String,
       startTime: QuestItemModel._nullableDateTimeFromJson(json['start_time']),
       stopTime: QuestItemModel._nullableDateTimeFromJson(json['stop_time']),
       finishTime: QuestItemModel._nullableDateTimeFromJson(json['finish_time']),
+      deadline: QuestItemModel._nullableDateTimeFromJson(json['deadline']),
     );
 
 Map<String, dynamic> _$QuestItemModelToJson(QuestItemModel instance) =>
@@ -34,12 +37,12 @@ Map<String, dynamic> _$QuestItemModelToJson(QuestItemModel instance) =>
       'tag': instance.tag,
       'days': instance.days,
       'progress_time': QuestItemModel._durationToSeconds(instance.progressTime),
-      'complete_time':
-          QuestItemModel._nullableDateTimeToJson(instance.completeTime),
+      'complete_time': QuestItemModel._durationToSeconds(instance.completeTime),
       'finish': instance.isCompleted,
       'quest_type': instance.questType,
       'start_time': QuestItemModel._nullableDateTimeToJson(instance.startTime),
       'stop_time': QuestItemModel._nullableDateTimeToJson(instance.stopTime),
       'finish_time':
           QuestItemModel._nullableDateTimeToJson(instance.finishTime),
+      'deadline': QuestItemModel._nullableDateTimeToJson(instance.deadline),
     };
